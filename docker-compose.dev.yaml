@@ -1,0 +1,49 @@
+version: "3.9"
+
+services:
+  ### BACKEND ###
+  symfony:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: symfony_app
+    restart: unless-stopped
+    volumes:
+      - ./backend:/var/www/html
+    environment:
+      DATABASE_URL: "postgresql://symfony:symfony@db:5432/symfony_db?serverVersion=15&charset=utf8"
+      STRIPE_SECRET_KEY: "sk_test_your_secret_key"
+      STRIPE_PUBLIC_KEY: "pk_test_your_public_key"
+    depends_on:
+      - db
+    ports:
+      - "8000:8000" 
+
+  ### FRONTEND ###
+  react:
+    image: node:18
+    container_name: react_client
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    environment:
+      REACT_APP_STRIPE_PUBLIC_KEY: "pk_test_your_public_key"
+    command: sh -c "npm install && npm run dev"
+    ports:
+      - "3000:3000"
+
+  ### DATABASE ###
+  db:
+    image: postgres:15
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: symfony
+      POSTGRES_PASSWORD: symfony
+      POSTGRES_DB: symfony_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres_data:

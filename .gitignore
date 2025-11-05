@@ -1,0 +1,14 @@
+#Ignore vscode AI rules
+.github\instructions\codacy.instructions.md
+
+# Symfony
+/backend/vendor/
+/backend/.env
+/backend/.env.local
+
+# React
+/frontend/node_modules/
+/frontend/build/
+
+# Docker
+/postgres_data/
