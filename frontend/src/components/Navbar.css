@@ -1,91 +1,120 @@
+/* Navbar.css - mobile-first, robust */
+
 .navbar {
+  position: relative;           /* needed for absolute children */
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: #222;
-  color: white;
-  padding: 0.5rem 1rem;
-  position: relative;
+  padding: 10px 12px;
+  background: #222;
+  color: #fff;
+  z-index: 1000;
+  height: 56px;                 /* fixed height helps layout */
+  box-sizing: border-box;
 }
 
-/* Home et connexion */
-.home, .login {
-  color: white;
+/* Basic link styles */
+.navbar a {
+  color: #fff;
   text-decoration: none;
-  font-weight: bold;
+  font-weight: 600;
 }
 
-/* Burger button - mobile */
+/* Home centered on mobile (absolute center) */
+.home {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 50%;
+  transform-origin: center;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+}
+
+/* Connexion at the right on mobile */
+.login {
+  margin-left: auto;
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Burger button - visible on mobile */
 .burger {
-  display: none;
-  font-size: 1.5rem;
   background: none;
   border: none;
   color: white;
+  font-size: 24px;
   cursor: pointer;
+  z-index: 1100;
 }
 
-/* Menu items */
+/* Menu - hidden by default (mobile) */
 .menu {
-  display: flex;
-  gap: 1rem;
+  position: absolute;
+  top: 56px;            /* below navbar height */
+  left: 0;
+  right: 0;
+  background: #222;
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+  z-index: 1050;
 }
 
-/* Mobile styles */
-@media (max-width: 768px) {
-  .burger {
-    display: block;
-  }
+/* When open, show menu */
+.menu.open {
+  display: flex;
+}
 
-  .menu {
-    position: absolute;
-    top: 60px;
-    left: 0;
-    right: 0;
-    background-color: #222;
-    flex-direction: column;
-    display: none;
-  }
-
-  .menu.open {
-    display: flex;
-  }
-
-  .home {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-  }
-
-  .login {
-    position: absolute;
-    right: 1rem;
-  }
+/* Menu item in mobile */
+.nav-item {
+  padding: 8px 6px;
+  border-radius: 6px;
 }
 
 /* Desktop styles */
 @media (min-width: 769px) {
-  .home {
-    order: 1;
+
+  .navbar {
+    height: auto;
+    padding: 12px 24px;
   }
 
-  .menu {
-    order: 2;
-    flex: 1;
-    justify-content: center;
+  /* Reset mobile absolute positions */
+  .home {
+    position: static;
+    transform: none;
+    margin-right: 12px;
   }
 
   .login {
-    order: 3;
+    position: static;
+    margin-left: 12px;
   }
-}
 
-/* Nav items */
-.nav-item {
-  color: white;
-  text-decoration: none;
-}
+  .burger {
+    display: none;
+  }
 
-.nav-item.active {
-  font-weight: bold;
+  /* Menu becomes horizontal, centered */
+  .menu {
+    position: static;
+    display: flex !important; /* force display on desktop */
+    flex-direction: row;
+    gap: 24px;
+    align-items: center;
+    flex: 1;
+    justify-content: center;
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .nav-item {
+    padding: 0;
+  }
 }

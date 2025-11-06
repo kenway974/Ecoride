@@ -2,13 +2,6 @@ import { useState } from "react";
 import { NavLink, Link } from "react-router-dom";
 import "./Navbar.css"; // Styles séparés
 
-
-function MyButton() {
-  return (
-    <button>Je suis un bouton</button>
-  );
-}
-
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
