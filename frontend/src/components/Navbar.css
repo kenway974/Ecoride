@@ -1,0 +1,91 @@
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #222;
+  color: white;
+  padding: 0.5rem 1rem;
+  position: relative;
+}
+
+/* Home et connexion */
+.home, .login {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+/* Burger button - mobile */
+.burger {
+  display: none;
+  font-size: 1.5rem;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+/* Menu items */
+.menu {
+  display: flex;
+  gap: 1rem;
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .burger {
+    display: block;
+  }
+
+  .menu {
+    position: absolute;
+    top: 60px;
+    left: 0;
+    right: 0;
+    background-color: #222;
+    flex-direction: column;
+    display: none;
+  }
+
+  .menu.open {
+    display: flex;
+  }
+
+  .home {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .login {
+    position: absolute;
+    right: 1rem;
+  }
+}
+
+/* Desktop styles */
+@media (min-width: 769px) {
+  .home {
+    order: 1;
+  }
+
+  .menu {
+    order: 2;
+    flex: 1;
+    justify-content: center;
+  }
+
+  .login {
+    order: 3;
+  }
+}
+
+/* Nav items */
+.nav-item {
+  color: white;
+  text-decoration: none;
+}
+
+.nav-item.active {
+  font-weight: bold;
+}
