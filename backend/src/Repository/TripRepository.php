@@ -16,28 +16,41 @@ class TripRepository extends ServiceEntityRepository
         parent::__construct($registry, Trip::class);
     }
 
-    //    /**
-    //     * @return Trip[] Returns an array of Trip objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('t')
-    //            ->andWhere('t.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('t.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    /**
+     * Recherche des trips par villes et date (safe)
+     *
+     * @param string|null $from startCity
+     * @param string|null $to arrivalCity
+     * @param string|null $date YYYY-MM-DD
+     * @return array tableau prêt à JSON
+     */
+    public function findByCityAndDateSafe(?string $from, ?string $to, ?string $date): array
+    {
+        $qb = $this->createQueryBuilder('t');
 
-    //    public function findOneBySomeField($value): ?Trip
-    //    {
-    //        return $this->createQueryBuilder('t')
-    //            ->andWhere('t.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+        if ($from) {
+            $qb->andWhere('t.startCity LIKE :from')
+               ->setParameter('from', '%' . $from . '%');
+        }
+
+        if ($to) {
+            $qb->andWhere('t.arrivalCity LIKE :to')
+               ->setParameter('to', '%' . $to . '%');
+        }
+
+        if ($date) {
+            try {
+                $dateObj = new \DateTime($date);
+                $nextDay = (clone $dateObj)->modify('+1 day');
+
+                $qb->andWhere('t.departureDate >= :start AND t.departureDate < :end')
+                ->setParameter('start', $dateObj->format('Y-m-d'))
+                ->setParameter('end', $nextDay->format('Y-m-d'));
+            } catch (\Exception $e) {
+            }
+        }
+
+
+        return $qb->getQuery()->getArrayResult();
+    }
 }
