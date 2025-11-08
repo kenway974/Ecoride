@@ -89,6 +89,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Review::class, mappedBy: 'moderated_by')]
     private Collection $moderated_reviews;
 
+    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    private ?Preference $preference = null;
+
     public function __construct()
     {
         $this->vehicles = new ArrayCollection();
@@ -421,6 +424,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $moderatedReview->setModeratedBy(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getPreference(): ?Preference
+    {
+        return $this->preference;
+    }
+
+    public function setPreference(?Preference $preference): static
+    {
+        $this->preference = $preference;
 
         return $this;
     }

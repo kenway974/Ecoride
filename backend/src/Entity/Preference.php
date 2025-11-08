@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 class Preference
 {
     #[ORM\Id, ORM\GeneratedValue, ORM\Column]
-    private ?int $id_pref = null;
+    private ?int $id = null;
 
     #[ORM\OneToOne(targetEntity: User::class, inversedBy: "preference")]
     #[ORM\JoinColumn(nullable: false)]
@@ -39,9 +39,9 @@ class Preference
     // Getters et setters
     // ------------------------
 
-    public function getIdPref(): ?int
+    public function getId(): ?int
     {
-        return $this->id_pref;
+        return $this->id;
     }
 
     public function getUser(): ?User
