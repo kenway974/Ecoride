@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20251106200523 extends AbstractMigration
+final class Version20251108180033 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -20,17 +20,16 @@ final class Version20251106200523 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE review ADD trip_id INT NOT NULL');
-        $this->addSql('ALTER TABLE review ADD CONSTRAINT FK_794381C6A5BC2E0E FOREIGN KEY (trip_id) REFERENCES trip (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
-        $this->addSql('CREATE INDEX IDX_794381C6A5BC2E0E ON review (trip_id)');
+        $this->addSql('CREATE TABLE refresh_tokens (id SERIAL NOT NULL, refresh_token VARCHAR(128) NOT NULL, username VARCHAR(255) NOT NULL, valid TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, PRIMARY KEY(id))');
+        $this->addSql('CREATE UNIQUE INDEX UNIQ_9BACE7E1C74F2195 ON refresh_tokens (refresh_token)');
     }
 
     public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
         $this->addSql('CREATE SCHEMA public');
-        $this->addSql('ALTER TABLE review DROP CONSTRAINT FK_794381C6A5BC2E0E');
-        $this->addSql('DROP INDEX IDX_794381C6A5BC2E0E');
-        $this->addSql('ALTER TABLE review DROP trip_id');
+        $this->addSql('DROP TABLE refresh_tokens');
+        $this->addSql('ALTER TABLE "user" DROP CONSTRAINT FK_8D93D649D81022C0');
+        $this->addSql('ALTER TABLE preference ALTER id DROP DEFAULT');
     }
 }
