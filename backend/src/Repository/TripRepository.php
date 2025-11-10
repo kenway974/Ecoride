@@ -62,9 +62,40 @@ class TripRepository extends ServiceEntityRepository
         }
 
         // Filtre par nombre de places restantes
-        $qb->andWhere('t.seatsRemaining > 0');
+        $qb->andWhere('t.seatsRemaining > 0')
+            ->getQuery();
 
-        // Retourne le résultat sous forme de tableau prêt pour JSON
-        return $qb->getQuery()->getArrayResult();
+        // Retourne le résultat en Array
+        return $qb->getQuery()->getResult();
+
     }
+
+    /**
+     * Récupère un Trip et toutes ses relations utiles :
+     * - driver
+     * - driver.preference
+     * - driver.reviews
+     * - vehicle
+     */
+    public function findOneWithRelations(int $id): ?Trip
+    {
+        $qb = $this->createQueryBuilder('t')
+            ->leftJoin('t.driver', 'd')
+            ->addSelect('d')
+            ->leftJoin('d.preference', 'dp')
+            ->addSelect('dp')
+            ->leftJoin('d.reviews', 'dr')
+            ->addSelect('dr')
+            ->leftJoin('t.vehicle', 'v')
+            ->addSelect('v')
+            ->andWhere('t.id = :id')
+            ->setParameter('id', $id)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        return $qb;
+
+            
+    }
+
 }

@@ -12,85 +12,54 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\Entity(repositoryClass: TripRepository::class)]
 class Trip
 {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    #[Groups(['trip:list'])]
+    #[ORM\Id, ORM\GeneratedValue, ORM\Column]
+    #[Groups(['trip:list', 'trip:read'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'trips')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['trip:list'])]
+    #[Groups(['trip:list', 'trip:read'])]
     private ?User $driver = null;
 
     #[ORM\ManyToOne(inversedBy: 'trips')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['trip:list'])]
+    #[Groups(['trip:list', 'trip:read'])]
     private ?Vehicle $vehicle = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['trip:list'])]
+    #[Groups(['trip:list', 'trip:read'])]
     private ?string $startCity = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['trip:list'])]
+    #[Groups(['trip:list', 'trip:read'])]
     private ?string $arrivalCity = null;
 
-    #[ORM\Column(length: 255)]
-    #[Groups(['trip:list'])]
-    private ?string $startAddress = null;
-
-    #[ORM\Column(length: 255)]
-    #[Groups(['trip:list'])]
-    private ?string $arrivalAddress = null;
-
     #[ORM\Column(type: Types::TIME_MUTABLE)]
-    #[Groups(['trip:list'])]
+    #[Groups(['trip:list', 'trip:read'])]
     private ?\DateTime $departureTime = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Groups(['trip:list'])]
+    #[Groups(['trip:list', 'trip:read'])]
     private ?\DateTime $departureDate = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Groups(['trip:list'])]
-    private ?\DateTime $arrivalDate = null;
-
-    #[ORM\Column(type: Types::TIME_MUTABLE)]
-    #[Groups(['trip:list'])]
-    private ?\DateTime $arrivalTime = null;
-
     #[ORM\Column]
-    #[Groups(['trip:list'])]
+    #[Groups(['trip:list', 'trip:read'])]
     private ?int $seatsRemaining = null;
 
     #[ORM\Column]
-    #[Groups(['trip:list'])]
+    #[Groups(['trip:list', 'trip:read'])]
     private ?float $price = null;
 
     #[ORM\Column]
-    #[Groups(['trip:list'])]
+    #[Groups(['trip:list', 'trip:read'])]
     private ?bool $isEcological = false;
 
     #[ORM\Column(length: 20)]
-    #[Groups(['trip:list'])]
+    #[Groups(['trip:list', 'trip:read'])]
     private ?string $status = null;
 
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['trip:list'])]
-    private ?string $description = null;
-
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['trip:list'])]
-    private ?string $luggage = null;
-
-    #[ORM\Column(nullable: true)]
-    private ?\DateTimeImmutable $createdAt = null;
-
-    #[ORM\Column(nullable: true)]
-    private ?\DateTimeImmutable $updatedAt = null;
-
     #[ORM\OneToMany(targetEntity: Reservation::class, mappedBy: 'trip')]
+    #[Groups(['trip:read'])]
     private Collection $reservations;
 
     public function __construct()
@@ -98,8 +67,7 @@ class Trip
         $this->reservations = new ArrayCollection();
     }
 
-    public function getId(): ?int { return $this->id; }
-
+    // getters / setters
     public function getDriver(): ?User { return $this->driver; }
     public function setDriver(?User $driver): static { $this->driver = $driver; return $this; }
 
@@ -112,23 +80,11 @@ class Trip
     public function getArrivalCity(): ?string { return $this->arrivalCity; }
     public function setArrivalCity(string $arrivalCity): static { $this->arrivalCity = $arrivalCity; return $this; }
 
-    public function getStartAddress(): ?string { return $this->startAddress; }
-    public function setStartAddress(string $startAddress): static { $this->startAddress = $startAddress; return $this; }
-
-    public function getArrivalAddress(): ?string { return $this->arrivalAddress; }
-    public function setArrivalAddress(string $arrivalAddress): static { $this->arrivalAddress = $arrivalAddress; return $this; }
-
     public function getDepartureTime(): ?\DateTime { return $this->departureTime; }
     public function setDepartureTime(\DateTime $departureTime): static { $this->departureTime = $departureTime; return $this; }
 
     public function getDepartureDate(): ?\DateTime { return $this->departureDate; }
     public function setDepartureDate(\DateTime $departureDate): static { $this->departureDate = $departureDate; return $this; }
-
-    public function getArrivalDate(): ?\DateTime { return $this->arrivalDate; }
-    public function setArrivalDate(\DateTime $arrivalDate): static { $this->arrivalDate = $arrivalDate; return $this; }
-
-    public function getArrivalTime(): ?\DateTime { return $this->arrivalTime; }
-    public function setArrivalTime(\DateTime $arrivalTime): static { $this->arrivalTime = $arrivalTime; return $this; }
 
     public function getSeatsRemaining(): ?int { return $this->seatsRemaining; }
     public function setSeatsRemaining(int $seatsRemaining): static { $this->seatsRemaining = $seatsRemaining; return $this; }
@@ -141,22 +97,6 @@ class Trip
 
     public function getStatus(): ?string { return $this->status; }
     public function setStatus(string $status): static { $this->status = $status; return $this; }
-
-    public function getDescription(): ?string { return $this->description; }
-    public function setDescription(?string $description): static { $this->description = $description; return $this; }
-
-    public function getLuggage(): ?string { return $this->luggage; }
-    public function setLuggage(?string $luggage): static { $this->luggage = $luggage; return $this; }
-
-    public function getCreatedAt(): ?\DateTimeImmutable { return $this->createdAt; }
-    public function setCreatedAt(?\DateTimeImmutable $createdAt): static {
-        $this->createdAt = $createdAt ?? new \DateTimeImmutable();
-        return $this;
-    }
-
-    public function getUpdatedAt(): ?\DateTimeImmutable { return $this->updatedAt; }
-    public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static {
-        $this->updatedAt = $updatedAt ?? new \DateTimeImmutable();
-        return $this;
-    }
 }
+
+
