@@ -66,7 +66,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $vehicles;
 
     #[ORM\OneToMany(targetEntity: Trip::class, mappedBy: 'driver')]
-    #[Groups(['trip:read'])]
     private Collection $trips;
 
     #[ORM\OneToMany(targetEntity: Reservation::class, mappedBy: 'passenger')]

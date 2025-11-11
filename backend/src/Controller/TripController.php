@@ -19,16 +19,16 @@ final class TripController extends AbstractController
         $date = $request->query->get('date'); // YYYY-MM-DD ou null
 
         try {
-            $trips = $tripRepository->findByCityAndDateSafe(
-                $startCity,
-                $arrivalCity,
-                $date
-            );
+            $trips = $tripRepository->findByCityAndDateSafe($startCity, $arrivalCity, $date);
 
-            // Serializer pour appliquer les groupes
-            $data = $serializer->serialize($trips, 'json', ['groups' => ['trip:list']]);
+            // Sérialisation avec groupe
+            $jsonTrips = $serializer->serialize($trips, 'json', ['groups' => ['trip:list']]);
 
-            return JsonResponse::fromJsonString($data);
+            // Retourner un JSON complet avec "success" et "data"
+            return new JsonResponse([
+                'success' => true,
+                'data' => json_decode($jsonTrips, true)
+            ]);
         } catch (\Exception $e) {
             return $this->json([
                 'success' => false,
@@ -50,9 +50,12 @@ final class TripController extends AbstractController
             ], 404);
         }
 
-        // Serializer pour appliquer les groupes
-        $data = $serializer->serialize($trip, 'json', ['groups' => ['trip:read']]);
+        // Sérialisation avec groupe spécifique pour le détail
+        $jsonTrip = $serializer->serialize($trip, 'json', ['groups' => ['trip:read']]);
 
-        return JsonResponse::fromJsonString($data);
+        return new JsonResponse([
+            'success' => true,
+            'data' => json_decode($jsonTrip, true)
+        ]);
     }
 }
