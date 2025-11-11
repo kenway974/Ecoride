@@ -19,6 +19,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['trip:list', 'trip:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
@@ -62,14 +63,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     
     #[ORM\OneToMany(targetEntity: Vehicle::class, mappedBy: 'owner')]
-    #[Groups(['trip:read'])]
     private Collection $vehicles;
 
     #[ORM\OneToMany(targetEntity: Trip::class, mappedBy: 'driver')]
     private Collection $trips;
 
     #[ORM\OneToMany(targetEntity: Reservation::class, mappedBy: 'passenger')]
-    #[Groups(['trip:read'])]
     private Collection $reservations;
 
     #[ORM\OneToMany(targetEntity: Review::class, mappedBy: 'author')]
@@ -77,10 +76,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $reviews;
 
     #[ORM\OneToMany(targetEntity: Review::class, mappedBy: 'moderated_by')]
-    #[Groups(['trip:read'])]
     private Collection $moderated_reviews;
 
-    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(mappedBy: 'user', targetEntity: Preference::class, cascade: ['persist', 'remove'])]
     #[Groups(['trip:read'])]
     private ?Preference $preference = null;
 

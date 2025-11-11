@@ -35,12 +35,20 @@ class Trip
     private ?string $arrivalCity = null;
 
     #[ORM\Column(type: Types::TIME_MUTABLE)]
-    #[Groups(['trip:list', 'trip:read'])]
+    #[Groups(['trip:read'])]
     private ?\DateTime $departureTime = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(['trip:list', 'trip:read'])]
     private ?\DateTime $departureDate = null;
+
+    #[ORM\Column(type: Types::TIME_MUTABLE)]
+    #[Groups(['trip:read'])]
+    private ?\DateTime $arrivalTime = null;
+
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Groups(['trip:list', 'trip:read'])]
+    private ?\DateTime $arrivalDate = null;
 
     #[ORM\Column]
     #[Groups(['trip:list', 'trip:read'])]
@@ -68,34 +76,65 @@ class Trip
     }
 
     // getters / setters
-    public function getDriver(): ?User { return $this->driver; }
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+    
+    public function setId($id): static
+    {
+        $this->id = $id;
+        return $this;
+    }
+
+    public function getDriver(): ?User 
+    { return $this->driver; }
+    
     public function setDriver(?User $driver): static { $this->driver = $driver; return $this; }
 
     public function getVehicle(): ?Vehicle { return $this->vehicle; }
+    
     public function setVehicle(?Vehicle $vehicle): static { $this->vehicle = $vehicle; return $this; }
 
     public function getStartCity(): ?string { return $this->startCity; }
+    
     public function setStartCity(string $startCity): static { $this->startCity = $startCity; return $this; }
 
     public function getArrivalCity(): ?string { return $this->arrivalCity; }
+    
     public function setArrivalCity(string $arrivalCity): static { $this->arrivalCity = $arrivalCity; return $this; }
 
     public function getDepartureTime(): ?\DateTime { return $this->departureTime; }
+    
     public function setDepartureTime(\DateTime $departureTime): static { $this->departureTime = $departureTime; return $this; }
 
     public function getDepartureDate(): ?\DateTime { return $this->departureDate; }
+    
     public function setDepartureDate(\DateTime $departureDate): static { $this->departureDate = $departureDate; return $this; }
 
+    public function getArrivalTime(): ?\DateTime { return $this->arrivalTime; }
+
+    public function setArrivalTime(\DateTime $arrivalTime): static { $this->arrivalTime = $arrivalTime; return $this; }
+
+    public function getArrivalDate(): ?\DateTime { return $this->arrivalDate; }
+
+    public function setArrivalDate(\DateTime $arrivalDate): static { $this->arrivalDate = $arrivalDate; return $this; }
+
     public function getSeatsRemaining(): ?int { return $this->seatsRemaining; }
+    
     public function setSeatsRemaining(int $seatsRemaining): static { $this->seatsRemaining = $seatsRemaining; return $this; }
 
     public function getPrice(): ?float { return $this->price; }
+    
     public function setPrice(float $price): static { $this->price = $price; return $this; }
 
     public function isEcological(): ?bool { return $this->isEcological; }
+    
     public function setIsEcological(bool $isEcological): static { $this->isEcological = $isEcological; return $this; }
 
     public function getStatus(): ?string { return $this->status; }
+    
     public function setStatus(string $status): static { $this->status = $status; return $this; }
 }
 

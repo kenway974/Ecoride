@@ -6,6 +6,8 @@ use App\Repository\VehicleRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
+
 
 #[ORM\Entity(repositoryClass: VehicleRepository::class)]
 class Vehicle
@@ -13,6 +15,7 @@ class Vehicle
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['trip:read'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'vehicles')]
@@ -23,21 +26,27 @@ class Vehicle
     private ?string $plate = null;
 
     #[ORM\Column(length: 50)]
+    #[Groups(['trip:read'])]
     private ?string $brand = null;
 
     #[ORM\Column(length: 50)]
+    #[Groups(['trip:read'])]
     private ?string $model = null;
 
     #[ORM\Column]
+    #[Groups(['trip:read'])]
     private ?int $release_year = null;
 
     #[ORM\Column(length: 20)]
+    #[Groups(['trip:read'])]
     private ?string $energy = null;
 
     #[ORM\Column]
+    #[Groups(['trip:read'])]
     private ?int $seats_total = null;
 
     #[ORM\Column]
+    #[Groups(['trip:read'])]
     private ?int $seats_available = null;
 
     #[ORM\Column]

@@ -3,11 +3,14 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
+
 
 #[ORM\Entity]
 class Preference
 {
     #[ORM\Id, ORM\GeneratedValue, ORM\Column]
+    #[Groups(['trip:read'])]
     private ?int $id = null;
 
     #[ORM\OneToOne(targetEntity: User::class, inversedBy: "preference")]
@@ -15,19 +18,24 @@ class Preference
     private ?User $user = null;
 
     #[ORM\Column(type: "boolean")]
+    #[Groups(['trip:read'])]
     private bool $animals = false;
 
     #[ORM\Column(type: "boolean")]
+    #[Groups(['trip:read'])]
     private bool $smoke = false;
 
     #[ORM\Column(type: "boolean")]
+    #[Groups(['trip:read'])]
     private bool $food = false;
 
     #[ORM\Column(type: "boolean")]
+    #[Groups(['trip:read'])]
     private bool $is_custom = false;
 
     #[ORM\Column(type: "json", nullable: true)]
-    private array $options = []; // stockage JSON pour les prefs dynamiques
+    #[Groups(['trip:read'])]
+    private array $options = [];
 
     #[ORM\Column(type: "datetime")]
     private ?\DateTimeInterface $created_at = null;

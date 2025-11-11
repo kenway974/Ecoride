@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react"; // useState et useEffect
-import { useParams, useNavigate } from "react-router-dom"; // hooks router
-import { fetchTrip } from "../services/TripService"; // ton service
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { fetchTrip } from "../services/TripService";
 import "./TripDetails.css";
-
 
 export default function TripDetails() {
   const { id } = useParams();
@@ -23,7 +22,6 @@ export default function TripDetails() {
         setLoading(false);
       }
     };
-
     loadTrip();
   }, [id]);
 
@@ -33,31 +31,50 @@ export default function TripDetails() {
 
   return (
     <div className="trip-details">
-      <button onClick={() => navigate(-1)} className="back-button">
-        Retour
-      </button>
+      <button onClick={() => navigate(-1)} className="back-button">Retour</button>
 
       <h2>Trajet #{trip.id}</h2>
-      <p><strong>De :</strong> {trip.start_city}</p>
-      <p><strong>À :</strong> {trip.arrival_city}</p>
-      <p><strong>Date :</strong> {new Date(trip.start_date).toLocaleDateString()}</p>
-      <p><strong>Date :</strong> {new Date(trip.departure_time).toLocaleDateString()}</p>
-      <p><strong>Date :</strong> {new Date(trip.arrival_date).toLocaleDateString()}</p>
-      <p><strong>Date :</strong> {new Date(trip.arrival_date).toLocaleDateString()}</p>
+      <p><strong>De :</strong> {trip.startCity}</p>
+      <p><strong>À :</strong> {trip.arrivalCity}</p>
+      <p><strong>Date départ :</strong> {trip.departureDate ? new Date(trip.departureDate).toLocaleDateString() : "N/A"}</p>
+      <p><strong>Heure départ :</strong> {trip.departureTime ?? "N/A"}</p>
+      <p><strong>Date arrivée :</strong> {trip.arrivalDate ? new Date(trip.arrivalDate).toLocaleDateString() : "N/A"}</p>
+      <p><strong>Heure arrivée :</strong> {trip.arrivalTime ?? "N/A"}</p>
+      <p><strong>Places restantes :</strong> {trip.seatsRemaining}</p>
       <p><strong>Prix :</strong> {trip.price} €</p>
-      <p><strong>Places restantes :</strong> {trip.seats_remaining}</p>
+      <p><strong>Écologique :</strong> {trip.isEcological ? "Oui" : "Non"}</p>
+      <p><strong>Status :</strong> {trip.status}</p>
 
       {trip.driver && (
         <>
           <p><strong>Conducteur :</strong> {trip.driver.username}</p>
+
           {trip.driver.preference && (
             <p><strong>Préférences :</strong> {JSON.stringify(trip.driver.preference)}</p>
+          )}
+
+          {trip.driver.vehicles && trip.driver.vehicles.length > 0 && (
+            <div>
+              <strong>Véhicules du conducteur :</strong>
+              <ul>
+                {trip.driver.vehicles.map((v, idx) => (
+                  <li key={idx}>{v.brand} {v.model} ({v.seatsTotal} places)</li>
+                ))}
+              </ul>
+            </div>
           )}
         </>
       )}
 
-      {trip.vehicle && (
-        <p><strong>Véhicule :</strong> {trip.vehicle.brand} {trip.vehicle.model}</p>
+      {trip.vehicle && trip.vehicle.length > 0 && (
+        <div>
+          <strong>Véhicule du trip :</strong>
+          <ul>
+            {trip.vehicle.map((v, idx) => (
+              <li key={idx}>{v.brand} {v.model} ({v.seatsTotal} places)</li>
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   );

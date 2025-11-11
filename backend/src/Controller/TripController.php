@@ -21,8 +21,13 @@ final class TripController extends AbstractController
         try {
             $trips = $tripRepository->findByCityAndDateSafe($startCity, $arrivalCity, $date);
 
-            // Sérialisation avec groupe
-            $jsonTrips = $serializer->serialize($trips, 'json', ['groups' => ['trip:list']]);
+            $jsonTrips = $serializer->serialize($trips, 'json', [
+                'groups' => ['trip:list'],
+                'circular_reference_handler' => function ($object) {
+                    return $object->getId(); // coupe la boucle
+                }
+            ]);
+
 
             // Retourner un JSON complet avec "success" et "data"
             return new JsonResponse([
@@ -42,6 +47,10 @@ final class TripController extends AbstractController
     public function show(int $id, TripRepository $tripRepository, SerializerInterface $serializer): JsonResponse
     {
         $trip = $tripRepository->findOneWithRelations($id);
+
+   $trip = $tripRepository->findOneWithRelations(1);
+
+
 
         if (!$trip) {
             return $this->json([
