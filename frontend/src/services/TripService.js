@@ -1,14 +1,18 @@
-const API_BASE = "http://localhost:8000/api"; // adapte selon ton Symfony
+import axios from "../AxiosInstance";
+
+const API_BASE = "/api"; // axiosInstance gère déjà http://localhost:8000
 
 export const fetchTrips = async ({ from, to, date }) => {
-  const params = new URLSearchParams({ from, to, date });
-  const res = await fetch(`${API_BASE}/trips?${params.toString()}`);
-  if (!res.ok) throw new Error("Failed to fetch trips");
-  return res.json();
+  const params = {};
+  if (from) params.from = from;
+  if (to) params.to = to;
+  if (date) params.date = date;
+
+  const response = await axios.get(`${API_BASE}/trips`, { params });
+  return response.data.data; // on retourne directement l'array
 };
 
-export const fetchTripById = async (id) => {
-  const res = await fetch(`${API_BASE}/trips/${id}`);
-  if (!res.ok) throw new Error("Failed to fetch trip details");
-  return res.json();
+export const fetchTrip = async (id) => {
+  const response = await axios.get(`${API_BASE}/trips/${id}`);
+  return response.data.data; // idem, on retourne juste les données utiles
 };
