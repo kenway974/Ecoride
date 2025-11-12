@@ -1,7 +1,7 @@
 security:
     password_hashers:
-        Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface: 'auto'
-
+        Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface: auto;
+    
     providers:
         app_user_provider:
             entity:
@@ -21,13 +21,13 @@ security:
                 password_path: password
                 success_handler: lexik_jwt_authentication.handler.authentication_success
                 failure_handler: lexik_jwt_authentication.handler.authentication_failure
+        refresh_token:
+            pattern: ^/api/token/refresh
+            stateless: true
         api:
             pattern: ^/api
             stateless: true
             jwt: ~
-        refresh_token:
-            pattern: ^/api/token/refresh
-            stateless: true
 
 
     access_control:
