@@ -3,6 +3,8 @@
 namespace App\Controller;
 
 use App\Repository\TripRepository;
+use App\Repository\VehicleRepository;
+use App\Service\TripService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -32,6 +34,41 @@ final class TripController extends AbstractController
             return $this->json([
                 'success' => false,
                 'message' => 'Erreur lors de la récupération des trips.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    // -----------------------
+    // POST /api/trips
+    // -----------------------
+    #[Route('', name: 'create', methods: ['POST'])]
+    public function create(Request $request, VehicleRepository $vehicleRepo, TripService $tripService): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $driver = $this->getUser();
+
+        if (!$driver) {
+            return $this->json(['error' => 'Utilisateur non connecté'], 401);
+        }
+
+        $vehicle = $vehicleRepo->find($data['vehicleId'] ?? null);
+        if (!$vehicle) {
+            return $this->json(['error' => 'Véhicule introuvable'], 400);
+        }
+
+        try {
+            $trip = $tripService->createTrip($driver, $vehicle, $data);
+
+            return $this->json([
+                'success' => true,
+                'message' => 'Trajet créé avec succès',
+                'tripId' => $trip->getId(),
+            ], 201);
+        } catch (\Exception $e) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Erreur lors de la création du trajet',
                 'error' => $e->getMessage(),
             ], 500);
         }

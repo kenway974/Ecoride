@@ -1,7 +1,8 @@
 import { useState } from "react";
 
-export default function NewTripForm({ onSubmit }) {
+export default function NewTripForm({ vehicles = [], onSubmit }) {
   const [formData, setFormData] = useState({
+    vehicleId: vehicles[0]?.id || "",
     startCity: "",
     arrivalCity: "",
     startAddress: "",
@@ -32,6 +33,24 @@ export default function NewTripForm({ onSubmit }) {
 
   return (
     <form onSubmit={handleSubmit} className="bg-gray-50 p-4 rounded shadow-md space-y-4">
+      {/* Select véhicule */}
+      <div>
+        <label className="block font-medium mb-1">Véhicule</label>
+        <select
+          name="vehicleId"
+          value={formData.vehicleId}
+          onChange={handleChange}
+          className="w-full border px-2 py-1 rounded"
+          required
+        >
+          {vehicles.map((v) => (
+            <option key={v.id} value={v.id}>
+              {v.marque} {v.modele} — {v.plaque}
+            </option>
+          ))}
+        </select>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block font-medium mb-1">Ville de départ</label>
