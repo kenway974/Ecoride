@@ -3,6 +3,7 @@ import Home from "../pages/Home";
 import Trips from "../pages/Trips";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
+import Dashboard from "../pages/Dashboard";
 
 // Simple guard pour les routes privées
 function PrivateRoute({ children }) {
@@ -21,6 +22,7 @@ function AppRouter() {
       } />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/dashboard" element={<Dashboard />} />
       {/* fallback si page inconnue */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
