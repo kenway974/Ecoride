@@ -63,11 +63,9 @@ export default function Dashboard() {
         vehicles: [...(prev.vehicles || []), newVehicle],
       }));
 
-      // Mise à jour du rôle en "chauffeur"
       await UserService.updateUserRole("chauffeur");
       setRole("chauffeur");
-
-      // On cache le formulaire
+      
       setShowVehicleForm(false);
     } catch (err) {
       console.error(err);
@@ -75,9 +73,8 @@ export default function Dashboard() {
     }
   };
 
-  // ---------------------
+
   // Gestion des préférences
-  // ---------------------
   const handlePreferencesSubmit = async (preferencesData) => {
     try {
       await UserService.savePreferences(preferencesData);
@@ -88,9 +85,6 @@ export default function Dashboard() {
     }
   };
 
-  // ---------------------
-  // Rendu
-  // ---------------------
   return (
     <div className="p-6">
       <h2 className="text-2xl font-semibold mb-4">Mon Espace</h2>
