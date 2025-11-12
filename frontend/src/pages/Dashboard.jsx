@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import VehicleForm from "../components/forms/VehicleForm";
 import PreferenceForm from "../components/forms/PreferenceForm";
-import * as UserService from "../services/UserService"; // import du service complet
+import NewTripForm from "../components/forms/NewTripForm";
+import * as UserService from "../services/UserService";
 
 export default function Dashboard() {
-  const [role, setRole] = useState(null);
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
+  const [role, setRole] = useState(null);
   const [showVehicleForm, setShowVehicleForm] = useState(false);
+  const [showTripForm, setShowTripForm] = useState(false);
 
-  // 👤 récupération de l'utilisateur mockée pour l'instant
+  // 👤 récupération mockée
   useEffect(() => {
     const mockUser = {
       id: 1,
@@ -23,9 +27,7 @@ export default function Dashboard() {
         { id: 1, depart: "Lyon", arrivee: "Paris", date: "2025-11-15" },
         { id: 2, depart: "Marseille", arrivee: "Nice", date: "2025-11-20" },
       ],
-      reservations: [
-        { id: 1, trajet: "Paris → Lille", date: "2025-11-13" },
-      ],
+      reservations: [{ id: 1, trajet: "Paris → Lille", date: "2025-11-13" }],
       reviews: [
         { id: 1, auteur: "Paul", note: 5, commentaire: "Super chauffeur !" },
         { id: 2, auteur: "Lucie", note: 4, commentaire: "Très sympa !" },
@@ -49,23 +51,17 @@ export default function Dashboard() {
     }
   };
 
-  const handleDriverClick = () => {
-    setShowVehicleForm(true); // toggle le formulaire
-  };
+  const handleDriverClick = () => setShowVehicleForm(true);
 
   const handleVehicleSubmit = async (vehicleData) => {
     try {
       const newVehicle = await UserService.addVehicle(vehicleData);
-
-      // Ajout du véhicule dans le state local
       setUser((prev) => ({
         ...prev,
         vehicles: [...(prev.vehicles || []), newVehicle],
       }));
-
       await UserService.updateUserRole("chauffeur");
       setRole("chauffeur");
-      
       setShowVehicleForm(false);
     } catch (err) {
       console.error(err);
@@ -73,8 +69,6 @@ export default function Dashboard() {
     }
   };
 
-
-  // Gestion des préférences
   const handlePreferencesSubmit = async (preferencesData) => {
     try {
       await UserService.savePreferences(preferencesData);
@@ -113,13 +107,13 @@ export default function Dashboard() {
         <div className="flex gap-4 mb-6">
           <button
             onClick={handlePassengerClick}
-            className="bg-blue-500 text-white px-4 py-2 rounded"
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
           >
             Je suis passager
           </button>
           <button
             onClick={handleDriverClick}
-            className="bg-green-500 text-white px-4 py-2 rounded"
+            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
           >
             Je suis chauffeur
           </button>
@@ -127,12 +121,9 @@ export default function Dashboard() {
       )}
 
       {/* Formulaire chauffeur */}
-      {showVehicleForm && (
-        <div className="mt-6">
-          <VehicleForm onSubmit={handleVehicleSubmit} />
-        </div>
-      )}
+      {showVehicleForm && <VehicleForm onSubmit={handleVehicleSubmit} />}
 
+      {/* Contenu chauffeur */}
       {role === "chauffeur" && (
         <div className="mt-6 space-y-6">
           <PreferenceForm onSubmit={handlePreferencesSubmit} />
@@ -177,6 +168,28 @@ export default function Dashboard() {
             ) : (
               <p className="text-gray-500">Aucun trajet pour le moment.</p>
             )}
+
+            {/* Boutons */}
+            <div className="mt-3 flex gap-2">
+              <button
+                onClick={() => navigate("/trips")}
+                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+              >
+                Voir tous les trajets
+              </button>
+
+              {/*role === "chauffeur" && (*/
+                <button
+                  onClick={() => setShowTripForm((prev) => !prev)}
+                  className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                >
+                  {showTripForm ? "Annuler" : "Ajouter un trajet"}
+                </button>/*
+              )*/}
+            </div>
+
+            {/* Formulaire nouveau trajet */}
+            {showTripForm && <NewTripForm />}
           </section>
 
           {/* Réservations */}
