@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from "react";
 import VehicleForm from "../components/forms/VehicleForm";
 import PreferenceForm from "../components/forms/PreferenceForm";
-import { updateUserRole } from "../services/UserService";
+import * as UserService from "../services/UserService"; // import du service complet
 
 export default function Dashboard() {
   const [role, setRole] = useState(null);
   const [user, setUser] = useState(null);
+  const [showVehicleForm, setShowVehicleForm] = useState(false);
 
-  // Exemple de mock utilisateur (à remplacer plus tard par un fetch API)
+  // 👤 récupération de l'utilisateur mockée pour l'instant
   useEffect(() => {
-    // Simule des données utilisateur déjà récupérées
     const mockUser = {
+      id: 1,
+      nom: "Alex",
       photo: "https://via.placeholder.com/100",
+      role: null,
       vehicles: [
         { id: 1, marque: "Peugeot", modele: "208", plaque: "AB-123-CD" },
         { id: 2, marque: "Renault", modele: "Clio", plaque: "XY-456-ZZ" },
@@ -29,39 +32,89 @@ export default function Dashboard() {
       ],
     };
     setUser(mockUser);
+    setRole(mockUser.role);
   }, []);
 
+  // ---------------------
+  // Gestion des rôles
+  // ---------------------
   const handlePassengerClick = async () => {
-    await updateUserRole("passager");
-    setRole("passager");
+    try {
+      await UserService.updateUserRole("passager");
+      setRole("passager");
+      setUser((prev) => ({ ...prev, role: "passager" }));
+    } catch (err) {
+      console.error(err);
+      alert("Erreur lors de la mise à jour du rôle passager");
+    }
   };
 
-  const handleDriverClick = async () => {
-    setRole("chauffeur");
+  const handleDriverClick = () => {
+    setShowVehicleForm(true); // toggle le formulaire
   };
 
+  const handleVehicleSubmit = async (vehicleData) => {
+    try {
+      const newVehicle = await UserService.addVehicle(vehicleData);
+
+      // Ajout du véhicule dans le state local
+      setUser((prev) => ({
+        ...prev,
+        vehicles: [...(prev.vehicles || []), newVehicle],
+      }));
+
+      // Mise à jour du rôle en "chauffeur"
+      await UserService.updateUserRole("chauffeur");
+      setRole("chauffeur");
+
+      // On cache le formulaire
+      setShowVehicleForm(false);
+    } catch (err) {
+      console.error(err);
+      alert("Erreur lors de l’enregistrement du véhicule");
+    }
+  };
+
+  // ---------------------
+  // Gestion des préférences
+  // ---------------------
+  const handlePreferencesSubmit = async (preferencesData) => {
+    try {
+      await UserService.savePreferences(preferencesData);
+      alert("Préférences enregistrées !");
+    } catch (err) {
+      console.error(err);
+      alert("Erreur lors de la sauvegarde des préférences");
+    }
+  };
+
+  // ---------------------
+  // Rendu
+  // ---------------------
   return (
     <div className="p-6">
       <h2 className="text-2xl font-semibold mb-4">Mon Espace</h2>
 
-      {/* === SECTION PROFIL UTILISATEUR === */}
+      {/* Profil utilisateur */}
       {user && (
         <div className="mb-6 flex items-center gap-4">
           {user.photo && (
             <img
               src={user.photo}
-              alt="Photo de profil"
+              alt="Profil"
               className="w-20 h-20 rounded-full object-cover shadow-md"
             />
           )}
           <div>
             <p className="font-semibold">Bienvenue, {user.nom || "Utilisateur"}</p>
-            <p className="text-sm text-gray-500">Statut : {role || "Non défini"}</p>
+            <p className="text-sm text-gray-500">
+              Statut : {role || "Non défini"}
+            </p>
           </div>
         </div>
       )}
 
-      {/* === CHOIX DU RÔLE === */}
+      {/* Choix du rôle */}
       {!role && (
         <div className="flex gap-4 mb-6">
           <button
@@ -79,40 +132,43 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* === FORMULAIRES POUR CHAUFFEUR === */}
-      {role === "chauffeur" && (
-        <div className="mt-6 space-y-6">
-          <VehicleForm />
-          <PreferenceForm />
+      {/* Formulaire chauffeur */}
+      {showVehicleForm && (
+        <div className="mt-6">
+          <VehicleForm onSubmit={handleVehicleSubmit} />
         </div>
       )}
 
-      {/* === INFO PASSAGER === */}
-      {role === "passager" && (
-        <p className="mt-4 text-gray-600">
-          Aucune info supplémentaire requise ✅
-        </p>
-      )}
+      {role === "chauffeur" && (
+        <div className="mt-6 space-y-6">
+          <PreferenceForm onSubmit={handlePreferencesSubmit} />
 
-      {/* === INFOS UTILISATEUR : VÉHICULES, TRAJETS, ETC. === */}
-      {user && (
-        <div className="mt-10 space-y-8">
           {/* Véhicules */}
-          <section>
-            <h3 className="text-xl font-semibold mb-2">Mes véhicules</h3>
-            {user.vehicles?.length > 0 ? (
-              <ul className="list-disc ml-5 text-gray-700">
+          {user?.vehicles?.length > 0 && (
+            <div>
+              <h3 className="font-semibold mb-2">Mes véhicules :</h3>
+              <ul className="list-disc ml-5">
                 {user.vehicles.map((v) => (
                   <li key={v.id}>
                     {v.marque} {v.modele} — {v.plaque}
                   </li>
                 ))}
               </ul>
-            ) : (
-              <p className="text-gray-500">Aucun véhicule enregistré.</p>
-            )}
-          </section>
+            </div>
+          )}
+        </div>
+      )}
 
+      {/* Passager simple */}
+      {role === "passager" && (
+        <p className="mt-4 text-gray-600">
+          Aucune info supplémentaire requise ✅
+        </p>
+      )}
+
+      {/* Infos utilisateur générales */}
+      {user && (
+        <div className="mt-10 space-y-8">
           {/* Trajets */}
           <section>
             <h3 className="text-xl font-semibold mb-2">Mes trajets</h3>
