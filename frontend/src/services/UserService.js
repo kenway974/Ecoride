@@ -46,3 +46,17 @@ export const savePreferences = async (preferences) => {
     throw error;
   }
 };
+
+/**
+ * Récupère le dashboard de l'utilisateur connecté
+ * @returns {Promise<Object>}
+ */
+export const getDashboard = async () => {
+  try {
+    const response = await axios.get("/api/dashboard"); // token est envoyé via interceptor
+    return response.data;
+  } catch (error) {
+    console.error("Erreur getDashboard:", error.response || error);
+    throw error;
+  }
+};

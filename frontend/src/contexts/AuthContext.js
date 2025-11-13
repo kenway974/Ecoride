@@ -1,23 +1,27 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import axiosClient from "../AxiosClient";
+import { useNavigate } from "react-router-dom"; // Pour les redirections
 
-// Création du contexte
 const AuthContext = createContext();
 
-// Hook pour l’utiliser facilement
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
+  const navigate = useNavigate(); // Hook de React Router pour redirection
   const [token, setToken] = useState(localStorage.getItem("token") || null);
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Fonction pour login
+  /**
+   * Login
+   */
   const login = async (email, password) => {
     setLoading(true);
     try {
       const { data } = await axiosClient.post("/login", { email, password });
       setToken(data.token);
       localStorage.setItem("token", data.token);
+      await fetchUser(data.token); // récupère les infos de l'utilisateur
       setLoading(false);
       return true;
     } catch (err) {
@@ -26,54 +30,104 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Fonction pour logout
+  /**
+   * Logout
+   */
   const logout = () => {
     setToken(null);
+    setUser(null);
     localStorage.removeItem("token");
-    // optionnel : appeler un endpoint backend pour supprimer le refresh token cookie
+    navigate("/login"); // redirection vers login
   };
 
-  // Fonction pour refresh token
+  /**
+   * Refresh token
+   */
   const refreshToken = async () => {
     try {
-      const { data } = await axiosClient.post("/token/refresh"); // le cookie HttpOnly est envoyé automatiquement
+      const { data } = await axiosClient.post("/token/refresh");
       setToken(data.token);
       localStorage.setItem("token", data.token);
       return data.token;
     } catch (err) {
-      logout();
+      logout(); // si refresh échoue, on déconnecte
       throw err;
     }
   };
 
-  // Axios interceptor pour ajouter le JWT et refresh si 401
-  axiosClient.interceptors.request.use((config) => {
-    if (token) {
-      config.headers["Authorization"] = `Bearer ${token}`;
+  /**
+   * Récupère les infos de l'utilisateur connecté
+   */
+  const fetchUser = async (jwtToken = token) => {
+    if (!jwtToken) {
+      logout(); // pas de token, on redirige
+      return null;
     }
-    return config;
-  });
 
-  axiosClient.interceptors.response.use(
-    (response) => response,
-    async (error) => {
-      const originalRequest = error.config;
-      if (
-        error.response &&
-        error.response.status === 401 &&
-        !originalRequest._retry
-      ) {
-        originalRequest._retry = true;
-        const newToken = await refreshToken();
-        originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
-        return axiosClient(originalRequest);
-      }
-      return Promise.reject(error);
+    setLoading(true); // loading activé pour fetchUser
+    try {
+      const { data } = await axiosClient.get("/dashboard", {
+        headers: { Authorization: `Bearer ${jwtToken}` },
+      });
+      setUser(data);
+      setLoading(false);
+      return data;
+    } catch (err) {
+      setUser(null);
+      setLoading(false);
+      logout(); // token invalide → redirection vers login
+      throw err;
     }
-  );
+  };
+
+  /**
+   * Axios interceptors
+   */
+  useEffect(() => {
+    const reqInterceptor = axiosClient.interceptors.request.use((config) => {
+      if (token) config.headers["Authorization"] = `Bearer ${token}`;
+      return config;
+    });
+
+    const resInterceptor = axiosClient.interceptors.response.use(
+      (response) => response,
+      async (error) => {
+        const originalRequest = error.config;
+        if (
+          error.response?.status === 401 &&
+          !originalRequest._retry
+        ) {
+          originalRequest._retry = true;
+          try {
+            const newToken = await refreshToken();
+            originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
+            await fetchUser(newToken);
+            return axiosClient(originalRequest);
+          } catch {
+            logout(); // si refresh échoue
+          }
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    return () => {
+      axiosClient.interceptors.request.eject(reqInterceptor);
+      axiosClient.interceptors.response.eject(resInterceptor);
+    };
+  }, [token]);
 
   return (
-    <AuthContext.Provider value={{ token, login, logout, loading }}>
+    <AuthContext.Provider
+      value={{
+        token,
+        user,
+        loading,
+        login,
+        logout,
+        fetchUser,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

@@ -33,28 +33,27 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $this->getEntityManager()->flush();
     }
 
-    //    /**
-    //     * @return User[] Returns an array of User objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('u')
-    //            ->andWhere('u.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('u.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
-
-    //    public function findOneBySomeField($value): ?User
-    //    {
-    //        return $this->createQueryBuilder('u')
-    //            ->andWhere('u.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    /**
+     * Récupère un user avec ses relations
+     * @param int $id user
+     * @return User|null
+     */
+    public function findUserWithRelations(int $id): ?User
+    {
+        return $this->createQueryBuilder('u')
+            ->leftJoin('u.vehicles', 'v')
+                ->addSelect('v')
+            ->leftJoin('u.preference', 'p')
+                ->addSelect('p')
+            ->leftJoin('u.trips', 't')
+                ->addSelect('t')
+            ->leftJoin('u.reservations', 'r')
+                ->addSelect('r')
+            ->leftJoin('u.reviews', 'rev')
+                ->addSelect('rev')
+                ->andWhere('u.id = :id')
+                ->setParameter('id', $id)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }
