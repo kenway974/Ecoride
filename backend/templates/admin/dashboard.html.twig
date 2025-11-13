@@ -1,0 +1,39 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block content %}
+<h1>Espace Administrateur</h1>
+
+<p><strong>Total des crédits encaissés :</strong> {{ totalCredits }} €</p>
+
+<div style="width: 100%; max-width: 900px; margin-top: 30px;">
+    <canvas id="tripsChart"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const tripsData = {{ totalTrips|json_encode|raw }};
+    const jours = tripsData.map(t => t.day);
+    const nbCovo = tripsData.map(t => t.total);
+
+    const ctxTrips = document.getElementById('tripsChart').getContext('2d');
+    new Chart(ctxTrips, {
+        type: 'bar',
+        data: {
+            labels: jours,
+            datasets: [{
+                label: 'Nombre de covoiturages par jour',
+                data: nbCovo,
+                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+</script>
+{% endblock %}

@@ -67,4 +67,42 @@ class TripRepository extends ServiceEntityRepository
         // Retourne le résultat sous forme de tableau prêt pour JSON
         return $qb->getQuery()->getArrayResult();
     }
+
+    /**
+     * Retourne le nombre de trips par jour
+     *
+     * @return array [
+     *   ['day' => '2025-11-13', 'total' => 5],
+     *   ...
+     * ]
+     */
+    public function getTripsGroupedByDay(): array
+    {
+        $qb = $this->createQueryBuilder('t')
+            ->select('DATE(t.arrivalDate) as day, COUNT(t.id) as total')
+            ->groupBy('day')
+            ->orderBy('day', 'ASC');
+
+        return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * Retourne le nombre de trips par jour
+     *
+     * @return array [
+     *   ['day' => '2025-11-13', 'total' => 5],
+     *   ...
+     * ]
+     */
+    public function getCompletedTripsGroupedByDay(): array
+    {
+        $qb = $this->createQueryBuilder('t')
+            ->select('DATE(t.arrivalDate) as day, COUNT(t.id) as total')
+                ->where('t.status = :status')
+                ->setParameter('status', 'completed')
+            ->groupBy('day')
+            ->orderBy('day', 'ASC');
+
+        return $qb->getQuery()->getResult();
+    }
 }
