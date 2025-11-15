@@ -1,4 +1,5 @@
 <?php
+/*
 
 namespace App\Controller;
 
@@ -56,3 +57,4 @@ final class RefreshTokenController extends AbstractController
         return new JsonResponse(['token' => $token]);
     }
 }
+    */

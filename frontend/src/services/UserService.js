@@ -1,4 +1,5 @@
 import axios from "axios";
+import axiosClient from "../AxiosClient";
 
 const API_URL = "/api/user";
 
@@ -47,16 +48,17 @@ export const savePreferences = async (preferences) => {
   }
 };
 
-/**
- * Récupère le dashboard de l'utilisateur connecté
- * @returns {Promise<Object>}
- */
-export const getDashboard = async () => {
+export const getUserDashboard = async () => {
+  const token = localStorage.getItem("token");
   try {
-    const response = await axios.get("/api/dashboard"); // token est envoyé via interceptor
+    const response = await axiosClient.get("/user_dashboard", {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
     return response.data;
   } catch (error) {
-    console.error("Erreur getDashboard:", error.response || error);
+    console.error("Erreur getUserDashboard:", error.response || error);
     throw error;
   }
 };

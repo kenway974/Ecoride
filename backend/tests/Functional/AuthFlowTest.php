@@ -1,70 +1,123 @@
 <?php
 
-namespace App\Tests\Controller;
+namespace App\Tests\Functional;
 
-use App\Entity\User;
+use App\Entity\RefreshToken;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use Symfony\Component\BrowserKit\Cookie;
+use App\Entity\User;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Doctrine\ORM\Tools\SchemaTool;
 
 class AuthFlowTest extends WebTestCase
 {
-    public function testLoginAndRefreshTokenFlow(): void
+    private EntityManagerInterface $em;
+    private UserPasswordHasherInterface $passwordHasher;
+    private $client;
+
+    protected function setUp(): void
     {
-        $client = static::createClient();
-        $container = $client->getContainer();
+        $this->client = static::createClient();
+        $container = $this->client->getContainer();
 
-        // --- 1️⃣ Créer un utilisateur test dans la BDD test
-        $em = $container->get('doctrine')->getManager();
+        $this->em = $container->get(EntityManagerInterface::class);
+        $this->passwordHasher = $container->get(UserPasswordHasherInterface::class);
 
+        $this->resetDatabase();
+        $this->createUser('john@example.com', 'password123');
+        $this->createRefreshToken();
+    }
+
+    private function resetDatabase(): void
+    {
+        $metadata = $this->em->getMetadataFactory()->getAllMetadata();
+        if (!empty($metadata)) {
+            $schemaTool = new \Doctrine\ORM\Tools\SchemaTool($this->em);
+            $schemaTool->dropSchema($metadata);
+            $schemaTool->createSchema($metadata);
+        }
+    }
+
+    private function createUser(string $email, string $password): void
+    {
         $user = new User();
-        $user->setEmail('sameme@example.com');
-        $user->setPassword(password_hash('azertyuiop974', PASSWORD_BCRYPT)); // hasher comme en prod
+        $user->setEmail($email)
+            ->setUsername('john')
+            ->setPassword($this->passwordHasher->hashPassword($user, $password))
+            ->setCredits(20)
+            ->setIsActive(true)
+            ->setCreatedAt(new \DateTimeImmutable())
+            ->setUpdatedAt(new \DateTimeImmutable());
+
         $user->setRoles(['ROLE_USER']);
-        $user->setUsername('TestUser');
-        $user->setIsActive(true);
-        $user->setCredits(0);
-        $user->setCreatedAt(new \DateTimeImmutable());
-        $user->setUpdatedAt(new \DateTimeImmutable());
 
-        $em->persist($user);
-        $em->flush();
+        $this->em->persist($user);
+        $this->em->flush();
+    }
 
-        // --- 2️⃣ Login
-        $client->request(
+    private function createRefreshToken(): void
+    {
+        $refreshToken = new RefreshToken();
+        $refreshToken->setRefreshToken(bin2hex(random_bytes(32)));
+        $refreshToken->setUsername('john@example.com');
+        $refreshToken->setValid((new \DateTimeImmutable())->modify('+30 days'));
+
+        $this->em->persist($refreshToken);
+        $this->em->flush();
+    }
+
+
+    public function testLoginSuccess(): void
+    {
+        $this->client->request(
             'POST',
             '/api/login',
             [],
             [],
             ['CONTENT_TYPE' => 'application/json'],
             json_encode([
-                'email' => 'sameme@example.com',
-                'password' => 'azertyuiop974',
+                'email' => 'john@example.com',
+                'password' => 'password123'
             ])
         );
 
-        $this->assertResponseIsSuccessful('Login devrait réussir');
-        $data = json_decode($client->getResponse()->getContent(), true);
-        $this->assertArrayHasKey('token', $data, 'JWT doit être retourné');
-        $jwt = $data['token'];
+        $this->assertResponseStatusCodeSame(200);
+        $data = json_decode($this->client->getResponse()->getContent(), true);
 
-        // --- 3️⃣ Vérifier que le cookie REFRESH_TOKEN est créé
-        $refreshCookie = $client->getCookieJar()->get('REFRESH_TOKEN');
-        $this->assertNotNull($refreshCookie, 'Le cookie REFRESH_TOKEN doit exister');
-        $this->assertTrue($refreshCookie->isHttpOnly(), 'Le cookie doit être HttpOnly');
-        $this->assertEquals('/api/token/refresh', $refreshCookie->getPath(), 'Le path du cookie doit être correct');
+        $this->assertArrayHasKey('token', $data, 'Le token JWT doit être présent.');
+    }
 
-        // --- 4️⃣ Simuler un refresh token
-        $client->getCookieJar()->set($refreshCookie); // ajouter le cookie au client
-        $client->request(
+    public function testLoginFailureWrongPassword(): void
+    {
+        $this->client->request(
             'POST',
-            '/api/token/refresh',
+            '/api/login',
             [],
             [],
-            ['CONTENT_TYPE' => 'application/json']
+            ['CONTENT_TYPE' => 'application/json'],
+            json_encode([
+                'email' => 'john@example.com',
+                'password' => 'wrongpass'
+            ])
         );
 
-        $this->assertResponseIsSuccessful('Refresh token doit réussir');
-        $refreshData = json_decode($client->getResponse()->getContent(), true);
-        $this->assertArrayHasKey('token', $refreshData, 'Un nouveau JWT doit être retourné');
+        $this->assertResponseStatusCodeSame(401);
+    }
+
+    public function testLoginFailureUnknownUser(): void
+    {
+        $this->client->request(
+            'POST',
+            '/api/login',
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json'],
+            json_encode([
+                'email' => 'nope@example.com',
+                'password' => 'irrelevant'
+            ])
+        );
+
+        $this->assertResponseStatusCodeSame(401);
     }
 }

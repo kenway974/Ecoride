@@ -1,7 +1,8 @@
-gesdinet_jwt_refresh_token:
-  ttl: 604800 # 7 jours
-  ttl_update: true
-  firewall: main
-  user_identity_field: email
-  refresh_token_class: App\Entity\RefreshToken
-  single_use: true
+#gesdinet_jwt_refresh_token:
+  #ttl: 604800 # 7 jours
+  #ttl_update: true
+  #firewall: login
+  #user_identity_field: email
+  #refresh_token_class: App\Entity\RefreshToken
+  #single_use: true
+  

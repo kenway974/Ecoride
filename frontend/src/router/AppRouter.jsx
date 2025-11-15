@@ -4,6 +4,9 @@ import Trips from "../pages/Trips";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Dashboard from "../pages/Dashboard";
+import { useAuth } from "../contexts/AuthContext";
+
+
 
 // Simple guard pour les routes privées
 function PrivateRoute({ children }) {
@@ -11,18 +14,31 @@ function PrivateRoute({ children }) {
   return token ? children : <Navigate to="/login" replace />;
 }
 
+function PublicRoute({ children }) {
+  const { token } = useAuth();
+  return token ? <Navigate to="/user_dashboard" replace /> : children;
+}
+
 function AppRouter() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/trips" element={
+      <Route path="/trips" element={<Trips />} />
+      <Route path="/login" element={
+        <PublicRoute>
+          <Login />
+        </PublicRoute>
+      } />
+      <Route path="/register" element={
+        <PublicRoute>
+        <Register />
+        </PublicRoute>
+      } />
+      <Route path="/user_dashboard" element={
         <PrivateRoute>
-          <Trips />
+          <Dashboard />
         </PrivateRoute>
       } />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/dashboard" element={<Dashboard />} />
       {/* fallback si page inconnue */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

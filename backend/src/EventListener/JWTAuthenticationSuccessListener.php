@@ -2,14 +2,13 @@
 
 namespace App\EventListener;
 
-use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken;
-use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
+
 use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
 use Symfony\Component\HttpFoundation\Cookie;
 
 class JWTAuthenticationSuccessListener
 {
-    public function __construct(private RefreshTokenManagerInterface $refreshTokenManager)
+    public function __construct()
     {
     }
 
@@ -17,7 +16,7 @@ class JWTAuthenticationSuccessListener
     {
         $user = $event->getUser();
 
-        // Créer un refresh token
+        /* Créer un refresh token
         $refreshToken = new RefreshToken();
         $refreshToken->setUsername($user->getUserIdentifier());
         $refreshToken->setValid(new \DateTime('+1 month'));
@@ -36,6 +35,6 @@ class JWTAuthenticationSuccessListener
             Cookie::SAMESITE_LAX
         );
 
-        $event->getResponse()->headers->setCookie($cookie);
+        $event->getResponse()->headers->setCookie($cookie)*/;
     }
 }

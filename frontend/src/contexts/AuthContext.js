@@ -1,28 +1,27 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState } from "react";
 import axiosClient from "../AxiosClient";
-import { useNavigate } from "react-router-dom"; // Pour les redirections
+import { useNavigate } from "react-router-dom";
 
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-  const navigate = useNavigate(); // Hook de React Router pour redirection
+  const navigate = useNavigate();
   const [token, setToken] = useState(localStorage.getItem("token") || null);
-  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  /**
-   * Login
-   */
+  // Login minimaliste
   const login = async (email, password) => {
     setLoading(true);
     try {
-      const { data } = await axiosClient.post("/login", { email, password });
+      const { data } = await axiosClient.post("/login_check", { email, password });
+
       setToken(data.token);
       localStorage.setItem("token", data.token);
-      await fetchUser(data.token); // récupère les infos de l'utilisateur
+
       setLoading(false);
+      navigate("/user_dashboard");
       return true;
     } catch (err) {
       setLoading(false);
@@ -30,104 +29,30 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  /**
-   * Logout
-   */
+  // Logout
   const logout = () => {
     setToken(null);
-    setUser(null);
     localStorage.removeItem("token");
-    navigate("/login"); // redirection vers login
+    navigate("/login");
   };
 
-  /**
-   * Refresh token
-   */
-  const refreshToken = async () => {
-    try {
-      const { data } = await axiosClient.post("/token/refresh");
-      setToken(data.token);
-      localStorage.setItem("token", data.token);
-      return data.token;
-    } catch (err) {
-      logout(); // si refresh échoue, on déconnecte
-      throw err;
-    }
-  };
+  // Pour récupérer l'utilisateur à la demande
+  const fetchUser = async () => {
+    if (!token) return null;
 
-  /**
-   * Récupère les infos de l'utilisateur connecté
-   */
-  const fetchUser = async (jwtToken = token) => {
-    if (!jwtToken) {
-      logout(); // pas de token, on redirige
-      return null;
-    }
-
-    setLoading(true); // loading activé pour fetchUser
     try {
-      const { data } = await axiosClient.get("/dashboard", {
-        headers: { Authorization: `Bearer ${jwtToken}` },
+      const { data } = await axiosClient.get("/user_dashboard", {
+        headers: { Authorization: `Bearer ${token}` },
       });
-      setUser(data);
-      setLoading(false);
-      return data;
+      return data.user;
     } catch (err) {
-      setUser(null);
-      setLoading(false);
-      logout(); // token invalide → redirection vers login
+      logout();
       throw err;
     }
   };
-
-  /**
-   * Axios interceptors
-   */
-  useEffect(() => {
-    const reqInterceptor = axiosClient.interceptors.request.use((config) => {
-      if (token) config.headers["Authorization"] = `Bearer ${token}`;
-      return config;
-    });
-
-    const resInterceptor = axiosClient.interceptors.response.use(
-      (response) => response,
-      async (error) => {
-        const originalRequest = error.config;
-        if (
-          error.response?.status === 401 &&
-          !originalRequest._retry
-        ) {
-          originalRequest._retry = true;
-          try {
-            const newToken = await refreshToken();
-            originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
-            await fetchUser(newToken);
-            return axiosClient(originalRequest);
-          } catch {
-            logout(); // si refresh échoue
-          }
-        }
-        return Promise.reject(error);
-      }
-    );
-
-    return () => {
-      axiosClient.interceptors.request.eject(reqInterceptor);
-      axiosClient.interceptors.response.eject(resInterceptor);
-    };
-  }, [token]);
 
   return (
-    <AuthContext.Provider
-      value={{
-        token,
-        user,
-        loading,
-        login,
-        logout,
-        fetchUser,
-      }}
-    >
+    <AuthContext.Provider value={{ token, loading, login, logout, fetchUser }}>
       {children}
     </AuthContext.Provider>
   );

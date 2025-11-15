@@ -1,55 +1,20 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext"; // <- AuthContext
-// plus besoin d'importer axiosClient ici, c'est géré dans le contexte
+import LoginForm from '../components/forms/LoginForm';
+import axiosClient from '../AxiosClient';
+import { useNavigate } from 'react-router-dom';
 
-function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+export default function Login() {
   const navigate = useNavigate();
-  const { login } = useAuth(); // <- récupère la fonction login depuis le contexte
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-
+  const handleLogin = async (email, password) => {
     try {
-      await login(email, password); // géré par AuthContext, stocke le JWT
-      setError("");
-      navigate("/trips"); // redirige vers la page protégée
+      const { data } = await axiosClient.post('/login_check', { email, password });
+      localStorage.setItem('token', data.token);
+      navigate('/dashboard');
     } catch (err) {
-      console.error(err);
-      if (err.response && err.response.data) {
-        setError(err.response.data.message || "Identifiants incorrects");
-      } else {
-        setError("Erreur réseau ou serveur");
-      }
+      console.error(err.response?.data || err.message);
+      alert('Login failed');
     }
   };
 
-  return (
-    <div>
-      <h2>Connexion</h2>
-      <form onSubmit={handleLogin}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Mot de passe"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-          required
-        />
-        <button type="submit">Se connecter</button>
-      </form>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-    </div>
-  );
+  return <LoginForm onSubmit={handleLogin} />;
 }
-
-export default Login;
