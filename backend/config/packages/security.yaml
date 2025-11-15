@@ -9,7 +9,7 @@ security:
         app_user_provider:
             entity:
                 class: App\Entity\User
-                property: email
+                property: username
 
     firewalls:
         dev:
@@ -29,7 +29,6 @@ security:
             jwt: ~
 
     access_control:
-    - { path: ^/api/user_dashboard, roles: ROLE_USER }
     - { path: ^/api/profile, roles: ROLE_USER }
     - { path: ^/api/register, roles: IS_AUTHENTICATED_ANONYMOUSLY }
     - { path: ^/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }

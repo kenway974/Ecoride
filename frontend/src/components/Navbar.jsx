@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { NavLink, Link } from "react-router-dom";
-import "./Navbar.css"; // Styles séparés
+import "./Navbar.css";
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleMenu = () => setIsOpen(!isOpen);
+
+  // Vérifie si l'utilisateur est connecté
+  const isLoggedIn = !!localStorage.getItem("token");
 
   return (
     <nav className="navbar">
@@ -29,10 +32,16 @@ function Navbar() {
         </NavLink>
       </div>
 
-      {/* Connexion */}
-      <Link to="/login" className="login">
-        Connexion
-      </Link>
+      {/* Connexion / Dashboard selon l'état */}
+      {isLoggedIn ? (
+        <Link to="/user_dashboard" className="login">
+          Dashboard
+        </Link>
+      ) : (
+        <Link to="/login" className="login">
+          Connexion
+        </Link>
+      )}
     </nav>
   );
 }

@@ -12,30 +12,23 @@ export default function Dashboard() {
   const [showVehicleForm, setShowVehicleForm] = useState(false);
   const [showTripForm, setShowTripForm] = useState(false);
 
-  // 👤 récupération mockée
   useEffect(() => {
-    const mockUser = {
-      id: 1,
-      nom: "Alex",
-      photo: "https://via.placeholder.com/100",
-      role: null,
-      vehicles: [
-        { id: 1, marque: "Peugeot", modele: "208", plaque: "AB-123-CD" },
-        { id: 2, marque: "Renault", modele: "Clio", plaque: "XY-456-ZZ" },
-      ],
-      trips: [
-        { id: 1, depart: "Lyon", arrivee: "Paris", date: "2025-11-15" },
-        { id: 2, depart: "Marseille", arrivee: "Nice", date: "2025-11-20" },
-      ],
-      reservations: [{ id: 1, trajet: "Paris → Lille", date: "2025-11-13" }],
-      reviews: [
-        { id: 1, auteur: "Paul", note: 5, commentaire: "Super chauffeur !" },
-        { id: 2, auteur: "Lucie", note: 4, commentaire: "Très sympa !" },
-      ],
-    };
-    setUser(mockUser);
-    setRole(mockUser.role);
+    async function fetchUser() {
+      try {
+        const data = await UserService.getUserDashboard();
+
+        setUser(data);
+        setRole(data.preference?.role || null); 
+        
+      } catch (err) {
+        console.error("Erreur fetch dashboard :", err);
+        navigate("/login");
+      }
+    }
+
+    fetchUser();
   }, []);
+
 
   // ---------------------
   // Gestion des rôles
@@ -94,9 +87,9 @@ export default function Dashboard() {
             />
           )}
           <div>
-            <p className="font-semibold">Bienvenue, {user.nom || "Utilisateur"}</p>
+            <p className="font-semibold">Bienvenue, {user.username || "Utilisateur"}</p>
             <p className="text-sm text-gray-500">
-              Statut : {role || "Non défini"}
+              Statut : {user.role || "Non défini"}
             </p>
           </div>
         </div>
