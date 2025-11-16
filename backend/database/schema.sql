@@ -24,9 +24,9 @@ CREATE TYPE review_status AS ENUM ('pending','published','blocked');
 -- ------------------------------
 CREATE TABLE "user" (
     id_user SERIAL PRIMARY KEY,
-    pseudo VARCHAR(50) NOT NULL UNIQUE,
+    username VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(100) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
     roles JSON NOT NULL,
     bio TEXT,
     phone VARCHAR(20),
@@ -69,16 +69,6 @@ CREATE TABLE preference (
     updated_at TIMESTAMP
 );
 
--- ------------------------------
--- TABLE address
--- ------------------------------
-CREATE TABLE address (
-    id_address SERIAL PRIMARY KEY,
-    start_address TEXT NOT NULL,
-    start_city VARCHAR(100) NOT NULL,
-    end_address TEXT NOT NULL,
-    arrival_city VARCHAR(100) NOT NULL
-);
 
 -- ------------------------------
 -- TABLE trip
@@ -99,7 +89,10 @@ CREATE TABLE trip (
     status trip_status DEFAULT 'planned',
     description TEXT,
     luggage TEXT,
-    distance NUMERIC(10,2),
+    start_address TEXT NOT NULL,
+    start_city VARCHAR(100) NOT NULL,
+    end_address TEXT NOT NULL,
+    arrival_city VARCHAR(100) NOT NULL
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP
 );

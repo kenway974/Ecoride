@@ -9,6 +9,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
@@ -18,6 +19,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['trip:list', 'trip:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
@@ -59,47 +61,35 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?\DateTimeImmutable $updated_at = null;
 
-    /**
-     * @var Collection<int, Vehicle>
-     */
+    
     #[ORM\OneToMany(targetEntity: Vehicle::class, mappedBy: 'owner')]
     private Collection $vehicles;
 
-    /**
-     * @var Collection<int, Trip>
-     */
     #[ORM\OneToMany(targetEntity: Trip::class, mappedBy: 'driver')]
     private Collection $trips;
 
-    /**
-     * @var Collection<int, Reservation>
-     */
     #[ORM\OneToMany(targetEntity: Reservation::class, mappedBy: 'passenger')]
     private Collection $reservations;
 
-    /**
-     * @var Collection<int, Review>
-     */
     #[ORM\OneToMany(targetEntity: Review::class, mappedBy: 'author')]
+    #[Groups(['trip:read'])]
     private Collection $reviews;
 
-    /**
-     * @var Collection<int, Review>
-     */
     #[ORM\OneToMany(targetEntity: Review::class, mappedBy: 'moderated_by')]
     private Collection $moderated_reviews;
 
-    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(mappedBy: 'user', targetEntity: Preference::class, cascade: ['persist', 'remove'])]
+    #[Groups(['trip:read'])]
     private ?Preference $preference = null;
 
-    public function __construct()
-    {
-        $this->vehicles = new ArrayCollection();
-        $this->trips = new ArrayCollection();
-        $this->reservations = new ArrayCollection();
-        $this->reviews = new ArrayCollection();
-        $this->moderated_reviews = new ArrayCollection();
-    }
+        public function __construct()
+        {
+            $this->vehicles = new ArrayCollection();
+            $this->trips = new ArrayCollection();
+            $this->reservations = new ArrayCollection();
+            $this->reviews = new ArrayCollection();
+            $this->moderated_reviews = new ArrayCollection();
+        }
 
     public function getId(): ?int
     {

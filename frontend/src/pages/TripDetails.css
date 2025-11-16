@@ -1,0 +1,60 @@
+/* src/pages/TripDetails.css */
+
+.trip-details {
+  max-width: 700px;
+  margin: 2rem auto;
+  padding: 1.5rem 2rem;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+}
+
+.trip-details h2 {
+  margin-bottom: 1rem;
+  color: #333;
+  font-size: 1.8rem;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 0.5rem;
+}
+
+.trip-details p {
+  margin: 0.5rem 0;
+  font-size: 1rem;
+  color: #555;
+}
+
+.trip-details strong {
+  color: #222;
+}
+
+.back-button {
+  display: inline-block;
+  margin-bottom: 1.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #007bff;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.back-button:hover {
+  background-color: #0056b3;
+}
+
+.trip-details p:last-child {
+  margin-bottom: 0;
+}
+
+/* Optional: style JSON for preferences */
+.trip-details pre {
+  background-color: #eee;
+  padding: 0.5rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  overflow-x: auto;
+}

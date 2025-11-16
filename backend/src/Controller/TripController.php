@@ -9,26 +9,32 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Serializer\SerializerInterface;
 
 final class TripController extends AbstractController
 {
     #[Route('/api/trips', name: 'api_trips', methods: ['GET'])]
-    public function index(Request $request, TripRepository $tripRepository): JsonResponse
+    public function index(Request $request, TripRepository $tripRepository, SerializerInterface $serializer): JsonResponse
     {
         $startCity = $request->query->get('from');
         $arrivalCity = $request->query->get('to');
         $date = $request->query->get('date'); // YYYY-MM-DD ou null
 
         try {
-            $trips = $tripRepository->findByCityAndDateSafe(
-                $startCity,
-                $arrivalCity,
-                $date
-            );
+            $trips = $tripRepository->findByCityAndDateSafe($startCity, $arrivalCity, $date);
 
-            return $this->json([
+            $jsonTrips = $serializer->serialize($trips, 'json', [
+                'groups' => ['trip:list'],
+                'circular_reference_handler' => function ($object) {
+                    return $object->getId(); // coupe la boucle
+                }
+            ]);
+
+
+            // Retourner un JSON complet avec "success" et "data"
+            return new JsonResponse([
                 'success' => true,
-                'data' => $trips,
+                'data' => json_decode($jsonTrips, true)
             ]);
         } catch (\Exception $e) {
             return $this->json([
@@ -37,6 +43,31 @@ final class TripController extends AbstractController
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    #[Route('/api/trips/{id}', name: 'api_trip_show', methods: ['GET'])]
+    public function show(int $id, TripRepository $tripRepository, SerializerInterface $serializer): JsonResponse
+    {
+        $trip = $tripRepository->findOneWithRelations($id);
+
+   $trip = $tripRepository->findOneWithRelations(1);
+
+
+
+        if (!$trip) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Trajet non trouvé.'
+            ], 404);
+        }
+
+        // Sérialisation avec groupe spécifique pour le détail
+        $jsonTrip = $serializer->serialize($trip, 'json', ['groups' => ['trip:read']]);
+
+        return new JsonResponse([
+            'success' => true,
+            'data' => json_decode($jsonTrip, true)
+        ]);
     }
 
     // -----------------------

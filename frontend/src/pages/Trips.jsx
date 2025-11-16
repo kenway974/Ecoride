@@ -49,8 +49,8 @@ export default function Trips() {
       try {
         setLoading(true);
         const response = await fetchTrips({ from, to, date });
-        setTrips(response.data || []);
-        setFilteredTrips(response.data || []);
+        setTrips(response || []); 
+        setFilteredTrips(response || []);
         setError(null);
       } catch (err) {
         setError(err.message || "Erreur lors de la récupération des trips.");

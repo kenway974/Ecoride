@@ -1,0 +1,5 @@
+framework:
+    serializer:
+        enabled: true
+        # enable_annotations: true   <-- à supprimer
+        enable_attributes: true      # <-- remplacer par ça

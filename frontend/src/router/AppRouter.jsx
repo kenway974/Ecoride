@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import Home from "../pages/Home";
 import Trips from "../pages/Trips";
+import TripDetails from "../pages/TripDetails";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Dashboard from "../pages/Dashboard";
@@ -24,6 +25,8 @@ function AppRouter() {
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/trips" element={<Trips />} />
+      <Route path="/trips" element={<Trips />} />
+      <Route path="/trip/:id" element={<TripDetails />} />
       <Route path="/login" element={
         <PublicRoute>
           <Login />
