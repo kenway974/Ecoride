@@ -51,10 +51,6 @@ final class TripController extends AbstractController
     {
         $trip = $tripRepository->findOneWithRelations($id);
 
-        $trip = $tripRepository->findOneWithRelations(1);
-
-
-
         if (!$trip) {
             return $this->json([
                 'success' => false,
@@ -70,6 +66,35 @@ final class TripController extends AbstractController
             'data' => json_decode($jsonTrip, true)
         ]);
     }
+
+    #[Route('/api/trips/{id}/reserve', name: 'trip_reserve', methods: ['POST'])]
+    public function reserve(int $id, Request $request, JwtService $jwtService, TripService $tripService, TripRepository $tripRepository): JsonResponse
+    {
+        try {
+            $user = $jwtService->validate($request);
+            $trip = $tripRepository->findOneWithRelations($id);
+
+            if (!$trip) {
+                return $this->json(['success' => false, 'message' => 'Trajet introuvable'], 404);
+            }
+
+            $tripService->reserveTrip($user, $trip);
+
+            return $this->json([
+                'success' => true,
+                'message' => 'Réservation effectuée avec succès',
+                'remainingSeats' => $trip->getSeatsRemaining(),
+                'userCredits' => $user->getCredits()
+            ], 200);
+
+        } catch (\Exception $e) {
+            return $this->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 400);
+        }
+    }
+
 
     // -----------------------
     // POST /api/trips

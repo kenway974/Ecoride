@@ -16,7 +16,9 @@ class TripService
     public function __construct(EntityManagerInterface $em, TripRepository $tripRepo)
     {
         $this->em = $em;
+        $this->tripRepo = $tripRepo;
     }
+
     /**
      * Crée un nouveau trajet pour un chauffeur.
      */
@@ -46,5 +48,34 @@ class TripService
         $this->em->flush();
 
         return $trip;
+    }
+
+    /**
+     * Réserver un trajet pour un utilisateur.
+     * Vérifie les places disponibles et les crédits.
+     * Décrémente seatsRemaining et crédite l'utilisateur.
+     */
+    public function reserveTrip(User $user, Trip $trip): void
+    {
+        if ($trip->getSeatsRemaining() <= 0) {
+            throw new \Exception("Aucune place disponible pour ce trajet.");
+        }
+
+        $totalPrice = $trip->getPrice() + 2; // frais supplémentaires
+        if ($user->getCredits() < $totalPrice) {
+            throw new \Exception("Crédits insuffisants pour réserver ce trajet.");
+        }
+
+        // Ajouter le passager
+        $trip->addPassenger($user);
+
+        // Mettre à jour les places et les crédits
+        $trip->setSeatsRemaining($trip->getSeatsRemaining() - 1);
+        $user->setCredits($user->getCredits() - $totalPrice);
+
+        // Persister les changements
+        $this->em->persist($trip);
+        $this->em->persist($user);
+        $this->em->flush();
     }
 }

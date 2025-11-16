@@ -94,9 +94,16 @@ class Trip
     #[Groups(['trip:read'])]
     private Collection $reservations;
 
+    /**
+     * @var Collection<int, User>
+     */
+    #[ORM\ManyToMany(targetEntity: User::class)]
+    private Collection $passengers;
+
     public function __construct()
     {
         $this->reservations = new ArrayCollection();
+        $this->passengers = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -327,6 +334,30 @@ class Trip
                 $reservation->setTrip(null);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function getPassengers(): Collection
+    {
+        return $this->passengers;
+    }
+
+    public function addPassenger(User $passenger): static
+    {
+        if (!$this->passengers->contains($passenger)) {
+            $this->passengers->add($passenger);
+        }
+
+        return $this;
+    }
+
+    public function removePassenger(User $passenger): static
+    {
+        $this->passengers->removeElement($passenger);
 
         return $this;
     }
