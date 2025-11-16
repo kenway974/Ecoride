@@ -4,6 +4,8 @@ import VehicleForm from "../components/forms/VehicleForm";
 import PreferenceForm from "../components/forms/PreferenceForm";
 import NewTripForm from "../components/forms/NewTripForm";
 import * as UserService from "../services/UserService";
+import { createTrip } from "../services/TripService";
+
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -182,7 +184,20 @@ export default function Dashboard() {
             </div>
 
             {/* Formulaire nouveau trajet */}
-            {showTripForm && <NewTripForm />}
+            <NewTripForm
+              vehicles={user?.vehicles || []}
+              onSubmit={async (tripData) => {
+                try {
+                  const newTrip = await TripService.createTrip(tripData);
+                  setUser(prev => ({ ...prev, trips: [...(prev.trips || []), newTrip] }));
+                  setShowTripForm(false);
+                } catch (err) {
+                  console.error(err);
+                  alert("Erreur lors de la création du trajet");
+                }
+              }}
+            />
+
           </section>
 
           {/* Réservations */}
