@@ -2,15 +2,50 @@
 
 namespace App\Service;
 
+use App\Repository\UserRepository;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 class JwtService
 {
+    private UserRepository $userRepository;
     private $jwtEncoder;
 
-    public function __construct(JWTEncoderInterface $jwtEncoder)
+    public function __construct(JWTEncoderInterface $jwtEncoder, UserRepository $userRepository)
     {
+        $this->userRepository = $userRepository;
         $this->jwtEncoder = $jwtEncoder;
+    }
+
+    /**
+     * Vérifie le token, décode le payload, récupère le user.
+     * Lance une Exception si problème.
+     */
+    public function validate(Request $request)
+    {
+        $authHeader = $request->headers->get('Authorization');
+
+        $jwt = $this->extractToken($authHeader);
+
+        if (!$jwt) {
+            throw new \Exception('Token manquant ou invalide');
+        }
+
+        $payload = $this->decodeToken($jwt);
+
+        if (!$payload || !isset($payload['username'])) {
+            throw new \Exception('Token invalide ou username manquant');
+        }
+
+        $username = $payload['username'];
+
+        $user = $this->userRepository->findUserWithRelations($username);
+
+        if (!$user) {
+            throw new \Exception('Utilisateur non trouvé');
+        }
+
+        return $user;
     }
 
     /**

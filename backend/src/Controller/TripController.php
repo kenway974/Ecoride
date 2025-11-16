@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Repository\TripRepository;
 use App\Repository\VehicleRepository;
+use App\Service\JwtService;
 use App\Service\TripService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -50,7 +51,7 @@ final class TripController extends AbstractController
     {
         $trip = $tripRepository->findOneWithRelations($id);
 
-   $trip = $tripRepository->findOneWithRelations(1);
+        $trip = $tripRepository->findOneWithRelations(1);
 
 
 
@@ -73,11 +74,12 @@ final class TripController extends AbstractController
     // -----------------------
     // POST /api/trips
     // -----------------------
-    #[Route('', name: 'create', methods: ['POST'])]
-    public function create(Request $request, VehicleRepository $vehicleRepo, TripService $tripService): JsonResponse
+    #[Route('/api/trip', name: 'create', methods: ['POST'])]
+    public function create(Request $request, VehicleRepository $vehicleRepo, TripService $tripService, JwtService $jwtService): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        $driver = $this->getUser();
+        
+        $driver = $jwtService->validate($request);
 
         if (!$driver) {
             return $this->json(['error' => 'Utilisateur non connecté'], 401);
