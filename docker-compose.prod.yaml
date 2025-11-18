@@ -12,8 +12,8 @@ services:
       - ./backend:/var/www/html
     environment:
       DATABASE_URL: "postgresql://symfony:symfony@db:5432/symfony_db?serverVersion=15&charset=utf8"
-      STRIPE_SECRET_KEY: "sk_live_your_secret_key"
-      STRIPE_PUBLIC_KEY: "pk_live_your_public_key"
+      STRIPE_SECRET_KEY: ""
+      STRIPE_PUBLIC_KEY: ""
     depends_on:
       - db
 
@@ -53,5 +53,17 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  mongodb:
+    image: mongo:6
+    container_name: mongodb_no_sql
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
 volumes:
   postgres_data:
+  mongo_data:
