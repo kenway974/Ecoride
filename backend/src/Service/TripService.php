@@ -7,20 +7,26 @@ use App\Entity\User;
 use App\Entity\Vehicle;
 use App\Repository\TripRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Service\SuggestionService;
 
 class TripService
 {
     private EntityManagerInterface $em;
     private TripRepository $tripRepo;
+    private SuggestionService $suggestionService;
 
-    public function __construct(EntityManagerInterface $em, TripRepository $tripRepo)
-    {
+    public function __construct(
+        EntityManagerInterface $em,
+        TripRepository $tripRepo,
+        SuggestionService $suggestionService
+    ) {
         $this->em = $em;
         $this->tripRepo = $tripRepo;
+        $this->suggestionService = $suggestionService;
     }
 
     /**
-     * Crée un nouveau trajet pour un chauffeur.
+     * Crée un nouveau trajet pour un chauffeur et l'ajoute aux suggestions MongoDB
      */
     public function createTrip(User $driver, Vehicle $vehicle, array $data): Trip
     {
@@ -44,8 +50,12 @@ class TripService
         $trip->setCreatedAt(null);
         $trip->setUpdatedAt(null);
 
+        // Persister le Trip dans MySQL
         $this->em->persist($trip);
         $this->em->flush();
+
+        // Ajouter le Trip dans MongoDB pour les suggestions
+        $this->suggestionService->addTripToSuggestions($trip);
 
         return $trip;
     }

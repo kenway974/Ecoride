@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Repository\TripRepository;
 use App\Repository\VehicleRepository;
 use App\Service\JwtService;
+use App\Service\SuggestionService;
 use App\Service\TripService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -15,24 +16,39 @@ use Symfony\Component\Serializer\SerializerInterface;
 final class TripController extends AbstractController
 {
     #[Route('/api/trips', name: 'api_trips', methods: ['GET'])]
-    public function index(Request $request, TripRepository $tripRepository, SerializerInterface $serializer): JsonResponse
+    public function index(
+        Request $request,
+        TripRepository $tripRepository,
+        SuggestionService $suggestionService,
+        SerializerInterface $serializer,
+        JwtService $jwtService
+    ): JsonResponse
     {
         $startCity = $request->query->get('from');
         $arrivalCity = $request->query->get('to');
         $date = $request->query->get('date'); // YYYY-MM-DD ou null
 
         try {
+            $user = $jwtService->validate($request);
+
+            // 1️⃣ Recherche exacte dans MySQL
             $trips = $tripRepository->findByCityAndDateSafe($startCity, $arrivalCity, $date);
+
+            // 2️⃣ Si aucun trip exact n’est trouvé, on propose des suggestions ±1 jour
+            if (empty($trips) && $date) {
+                $trips = $suggestionService->getSuggestions(
+                    $startCity,
+                    $arrivalCity,
+                    $date,
+                    $user ? $user->getId() : null
+                );
+            }
 
             $jsonTrips = $serializer->serialize($trips, 'json', [
                 'groups' => ['trip:list'],
-                'circular_reference_handler' => function ($object) {
-                    return $object->getId(); // coupe la boucle
-                }
+                'circular_reference_handler' => fn($object) => $object->getId(),
             ]);
 
-
-            // Retourner un JSON complet avec "success" et "data"
             return new JsonResponse([
                 'success' => true,
                 'data' => json_decode($jsonTrips, true)
@@ -45,6 +61,7 @@ final class TripController extends AbstractController
             ], 500);
         }
     }
+
 
     #[Route('/api/trips/{id}', name: 'api_trip_show', methods: ['GET'])]
     public function show(int $id, TripRepository $tripRepository, SerializerInterface $serializer): JsonResponse
