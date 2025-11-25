@@ -1,7 +1,7 @@
 # ====== BUILDER ======
 FROM php:8.2-fpm-bullseye AS builder
 
-# Installer les outils et dépendances nécessaires
+# Dépendances système nécessaires aux extensions PHP
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
@@ -9,30 +9,35 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     libicu-dev \
     libzip-dev \
+    libxml2-dev \
+    libcurl4-openssl-dev \
+    pkg-config \
     g++ \
     make \
     autoconf \
-    pkg-config \
     curl \
     && rm -rf /var/lib/apt/lists/*
+
+# Extensions PHP indispensables pour Symfony + Doctrine + JWT + Mercure
+RUN docker-php-ext-install \
+    pdo \
+    pdo_pgsql \
+    intl \
+    mbstring \
+    xml \
+    zip \
+    curl
+
+# Installer l’extension MongoDB
+RUN pecl install mongodb && docker-php-ext-enable mongodb
 
 # Installer composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
+# Copier le backend et installer les dépendances PHP
 WORKDIR /app
 COPY ./backend /app
-
-# Installer les extensions PHP une par une pour plus de fiabilité
-RUN docker-php-ext-configure intl \
-    && docker-php-ext-install intl \
-    && docker-php-ext-install pdo pdo_pgsql zip
-
-# Installer et activer MongoDB
-RUN pecl install mongodb \
-    && docker-php-ext-enable mongodb
-
-# Installer les dépendances PHP
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 # ====== PROD IMAGE ======
 FROM php:8.2-fpm-bullseye
