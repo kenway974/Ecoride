@@ -1,10 +1,22 @@
 # ====== BUILDER ======
 FROM php:8.2-fpm AS builder
 
-RUN apt-get update && apt-get install -y git unzip zip libpq-dev \
+RUN apt-get update && apt-get install -y \
+    git \
+    unzip \
+    zip \
+    libpq-dev \
+    libicu-dev \
+    g++ \
+    make \
+    autoconf \
+    pkg-config \
+    && docker-php-ext-configure intl \
     && docker-php-ext-install pdo pdo_pgsql intl zip \
     && pecl install mongodb \
     && docker-php-ext-enable mongodb
+
+
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 WORKDIR /app
