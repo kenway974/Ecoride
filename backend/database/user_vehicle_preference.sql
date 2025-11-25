@@ -3,8 +3,8 @@
 -- =========================
 INSERT INTO "user" (pseudo, email, password_hash, roles, credits, is_active, created_at)
 VALUES
-('driver_user', 'driver@example.com', '$2y$10$examplehashdriver', '{"ROLE_DRIVER"}', 20, true, NOW()),
-('passenger_user', 'passenger@example.com', '$2y$10$examplehashpassenger', '{"ROLE_PASSENGER"}', 20, true, NOW()),
+('driver_user', 'driver@example.com', '$2y$10$lTvS3Tudo58WxS3tB/SfyOvHNkdW5gu7o9ndPzB40DMI456yozrE6', '{"ROLE_DRIVER"}', 20, true, NOW()),
+('passenger_user', 'passenger@example.com', '$2y$10$1Nj1TmxESYfCQ5h7gMCUiea0/FF5XxvPR0JkZHDqZ3OXQMdopj.E2', '{"ROLE_PASSENGER"}', 20, true, NOW()),
 ('driver_passenger_user', 'driverpass@example.com', '$2y$10$examplehashdp', '{"ROLE_DRIVER","ROLE_PASSENGER"}', 20, true, NOW());
 
 -- Récupérer les IDs générés (PostgreSQL RETURNING)

@@ -97,8 +97,8 @@ export default function Trips() {
         </>
       )}
 
-      {loading && <p>Loading trips...</p>}
-      {error && <p>Error: {error}</p>}
+      {loading && <p>Recherche de trajets en cours...</p>}
+      {error && <p>Nous sommes navrés, ... {error}</p>}
 
       {!loading && trips.length > 0 && (
         <>

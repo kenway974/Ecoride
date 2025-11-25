@@ -6,6 +6,10 @@ RUN apt-get update && apt-get install -y \
     git unzip zip libpq-dev \
     && docker-php-ext-install pdo pdo_pgsql
 
+# installer extension mongo atlas
+RUN pecl install mongodb \
+    && docker-php-ext-enable mongodb
+
 # Installer Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 

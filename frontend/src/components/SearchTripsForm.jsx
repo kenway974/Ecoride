@@ -1,6 +1,6 @@
-// src/components/SearchTripForm.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { cities } from "../data/cities";
 import "./Form.css";
 
 export default function SearchTripForm() {
@@ -11,7 +11,12 @@ export default function SearchTripForm() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Redirection vers /trips avec query params
+
+    if (!from || !to) {
+      alert("Veuillez sélectionner les villes de départ et d'arrivée.");
+      return;
+    }
+
     navigate(
       `/trips?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&date=${encodeURIComponent(date)}`
     );
@@ -21,28 +26,38 @@ export default function SearchTripForm() {
     <form className="search-form" onSubmit={handleSubmit}>
       <div className="form-group">
         <label htmlFor="from">Ville de départ :</label>
-        <input
-          type="text"
+        <select
           id="from"
           name="from"
           value={from}
           onChange={(e) => setFrom(e.target.value)}
-          placeholder="Ex: Paris"
           required
-        />
+        >
+          <option value="">-- Choisissez une ville --</option>
+          {cities.map((city) => (
+            <option key={city} value={city}>
+              {city}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="form-group">
         <label htmlFor="to">Ville d'arrivée :</label>
-        <input
-          type="text"
+        <select
           id="to"
           name="to"
           value={to}
           onChange={(e) => setTo(e.target.value)}
-          placeholder="Ex: Lyon"
           required
-        />
+        >
+          <option value="">-- Choisissez une ville --</option>
+          {cities.map((city) => (
+            <option key={city} value={city}>
+              {city}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="form-group">

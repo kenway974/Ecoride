@@ -4,6 +4,7 @@
         "symfony/serializer": "^7.3",
         "symfony/property-access": "^7.3",
         "symfony/property-info": "^7.3",
-        "mongodb/mongodb": "^2.1"
+        "mongodb/mongodb": "^2.1",
+        "doctrine/mongodb-odm-bundle": "^5.5"
     }
 }
