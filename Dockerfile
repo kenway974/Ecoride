@@ -38,7 +38,7 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 # Copier le backend et installer les dépendances PHP
 WORKDIR /app
 COPY ./backend /app
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
+RUN composer install -vvv --no-dev --optimize-autoloader --no-interaction --no-scripts
 
 # ====== PROD IMAGE ======
 FROM php:8.2-fpm-bullseye
