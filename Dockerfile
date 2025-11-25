@@ -47,6 +47,7 @@ WORKDIR /var/www/html
 COPY --from=builder /app /var/www/html
 
 # Permissions
-RUN chown -R www-data:www-data var/ vendor/
+RUN mkdir -p var/cache var/log \
+    && chown -R www-data:www-data var vendor
 
 CMD ["php-fpm"]
