@@ -25,8 +25,6 @@ export const createTrip = async (tripData) => {
   return response.data.data;
 };
 
-import axios from "./AxiosInstance";
-
 export const reserveTrip = async (tripId) => {
   const response = await axios.post(`/api/trips/${id}/reserve`);
   return response.data;

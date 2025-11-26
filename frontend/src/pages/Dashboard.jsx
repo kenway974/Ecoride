@@ -4,7 +4,7 @@ import VehicleForm from "../components/forms/VehicleForm";
 import PreferenceForm from "../components/forms/PreferenceForm";
 import NewTripForm from "../components/forms/NewTripForm";
 import * as UserService from "../services/UserService";
-import { createTrip } from "../services/TripService";
+import * as TripService from "../services/TripService";
 
 
 export default function Dashboard() {

@@ -51,7 +51,9 @@ final class TripController extends AbstractController
 
             return new JsonResponse([
                 'success' => true,
-                'data' => json_decode($jsonTrips, true)
+                'data' => json_decode($jsonTrips, true),
+                'date' => $date
+                
             ]);
         } catch (\Exception $e) {
             return $this->json([
