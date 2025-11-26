@@ -127,7 +127,7 @@ export default function Trips() {
           <TripFilters filters={filters} setFilters={setFilters} />
 
           {/* Liste des trips */}
-          <TripList trips={filteredTrips} />
+          <TripList trips={filteredTrips} date={date}/>
         </>
       )}
     </div>
