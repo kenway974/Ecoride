@@ -1,7 +1,7 @@
 nelmio_cors:
     defaults:
         allow_credentials: true
-        allow_origin: ['*']
+        allow_origin: ['https://ecoride-7ryq.onrender.com']
         allow_headers: ['Content-Type', 'Authorization']
         expose_headers: ['Authorization']
         allow_methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
@@ -9,7 +9,3 @@ nelmio_cors:
 
     paths:
         '^/api/':
-            allow_origin: ['*']
-            allow_headers: ['Content-Type', 'Authorization']
-            allow_methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
-            max_age: 3600
