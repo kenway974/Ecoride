@@ -1,4 +1,4 @@
-import axios from "../AxiosInstance";
+import axios from "../AxiosClient";
 
 const API_BASE = "/api";
 
