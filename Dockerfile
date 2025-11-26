@@ -50,4 +50,4 @@ COPY --from=builder /app /var/www/html
 RUN mkdir -p var/cache var/log \
     && chown -R www-data:www-data var vendor
 
-CMD ["php-fpm"]
+CMD ["sh", "-c", "php -S 0.0.0.0:${PORT:-8000} -t public"]
