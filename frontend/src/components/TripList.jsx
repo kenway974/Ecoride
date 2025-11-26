@@ -2,11 +2,7 @@
 import { Link } from "react-router-dom";
 
 export default function TripList({ trips }) {
-  {trips.length > 0 &&
-        date /* &&
-        trips.some(trip => trip.departureDate !== date) && (
-          <p>Nous vous proposons des trajets proches de la date recherchée :</p>
-        )*/}
+  if (!trips || trips.length === 0) return <p>Aucun trajet ne correspond aux filtres.</p>;
 
   return trips.map(trip => (
     <div key={trip.id} className="trip-card">
