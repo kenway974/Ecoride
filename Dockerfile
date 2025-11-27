@@ -43,23 +43,18 @@ RUN composer install -vvv --no-dev --optimize-autoloader --no-interaction --no-s
 # ====== PROD IMAGE ======
 FROM nginx:1.25-alpine
 
-# Créer l'utilisateur www-data
-RUN addgroup -g 82 -S www-data \
-    && adduser -u 82 -D -S -G www-data www-data
-
-# Copier le backend 
+# Copier le backend depuis le builder
 COPY --from=builder /app /var/www/html
 
 # Copier la config Nginx
 COPY ./docker/default.conf /etc/nginx/conf.d/default.conf
 
-# Créer les dossiers / permissions
+# Créer les dossiers Symfony et donner les bonnes permissions
 RUN mkdir -p /var/www/html/var/cache /var/www/html/var/log \
-    && chown -R www-data:www-data /var/www/html \
     && chown -R nginx:nginx /var/www/html
 
 # Exposer le port
 EXPOSE 80
 
-# Lancer Nginx
+# Lancer Nginx en foreground
 CMD ["nginx", "-g", "daemon off;"]
