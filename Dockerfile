@@ -19,7 +19,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Extensions PHP indispensables pour Symfony + Doctrine + JWT + Mercure
+# Extensions PHP
 RUN docker-php-ext-install \
     pdo \
     pdo_pgsql \
@@ -43,18 +43,22 @@ RUN composer install -vvv --no-dev --optimize-autoloader --no-interaction --no-s
 # ====== PROD IMAGE ======
 FROM nginx:1.25-alpine
 
-# Copier le backend depuis le builder
+# Créer l'utilisateur www-data
+RUN addgroup -g 82 -S www-data \
+    && adduser -u 82 -D -S -G www-data www-data
+
+# Copier le backend 
 COPY --from=builder /app /var/www/html
 
 # Copier la config Nginx
 COPY ./docker/default.conf /etc/nginx/conf.d/default.conf
 
-# Créer les dossiers pour Symfony
+# Créer les dossiers / permissions
 RUN mkdir -p /var/www/html/var/cache /var/www/html/var/log \
     && chown -R www-data:www-data /var/www/html
 
 # Exposer le port
 EXPOSE 80
 
-# Lancer Nginx en foreground
+# Lancer Nginx
 CMD ["nginx", "-g", "daemon off;"]
