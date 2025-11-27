@@ -36,6 +36,9 @@ COPY --from=builder /app /var/www/html
 RUN mkdir -p var/cache var/log \
     && chown -R www-data:www-data /var/www/html
 
+ENV APP_ENV=prod
+ENV APP_DEBUG=0
+
 # Copier conf Nginx
 COPY ./docker/default.conf /etc/nginx/sites-available/default
 
