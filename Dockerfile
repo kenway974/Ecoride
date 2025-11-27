@@ -28,17 +28,18 @@ FROM php:8.2-fpm-bullseye
 RUN apt-get update && apt-get install -y nginx \
     && rm -rf /var/lib/apt/lists/*
 
+# Copier le backend
 WORKDIR /var/www/html
 COPY --from=builder /app /var/www/html
 
-# Créer dossiers Symfony et permissions
+# Dossiers Symfony + permissions
 RUN mkdir -p var/cache var/log \
     && chown -R www-data:www-data /var/www/html
 
-# Copier config Nginx
+# Copier conf Nginx
 COPY ./docker/default.conf /etc/nginx/sites-available/default
 
-# Exposer le port
+# Exposer le port HTTP
 EXPOSE 80
 
 # Lancer PHP-FPM + Nginx
