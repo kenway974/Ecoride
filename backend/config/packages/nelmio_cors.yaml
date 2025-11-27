@@ -9,3 +9,4 @@ nelmio_cors:
 
     paths:
         '^/api/':
+            allow_origin: ['https://ecoride-7ryq.onrender.com']
