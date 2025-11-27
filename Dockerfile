@@ -47,7 +47,7 @@ FROM nginx:1.25-alpine
 COPY --from=builder /app /var/www/html
 
 # Copier la config Nginx
-COPY ./docker/nginx.conf /etc/nginx/conf.d/default.conf
+COPY ./docker/default.conf /etc/nginx/conf.d/default.conf
 
 # Créer les dossiers pour Symfony
 RUN mkdir -p /var/www/html/var/cache /var/www/html/var/log \
