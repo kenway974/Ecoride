@@ -33,7 +33,6 @@ COPY config/nginx.conf /etc/nginx/nginx.conf
 COPY config/conf.d /etc/nginx/conf.d/
 COPY config/fpm-pool.conf /etc/php84/php-fpm.d/www.conf
 COPY config/php.ini /etc/php84/conf.d/custom.ini
-COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Permissions
 RUN chown -R nobody:nobody /var/www/html /run /var/lib/nginx /var/log/nginx
@@ -51,7 +50,7 @@ ENV APP_DEBUG=0
 EXPOSE 8080
 
 # Lancer PHP-FPM + Nginx
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+CMD ["sh", "-c", "php-fpm -D && nginx -g 'daemon off;'"]
 
 # Healthcheck
 HEALTHCHECK --timeout=10s CMD curl --silent --fail http://127.0.0.1:8080/fpm-ping || exit 1
