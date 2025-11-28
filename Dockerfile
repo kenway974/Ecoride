@@ -1,60 +1,23 @@
-# ====== BUILDER ======
-FROM php:8.2-fpm-bullseye AS builder
+FROM php:8.2-fpm-bullseye AS app
 
-# Dépendances système nécessaires aux extensions PHP
 RUN apt-get update && apt-get install -y \
-    git \
-    unzip \
-    zip \
-    libpq-dev \
-    libicu-dev \
-    libzip-dev \
-    libonig-dev \
-    libxml2-dev \
-    libcurl4-openssl-dev \
-    pkg-config \
-    g++ \
-    make \
-    autoconf \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+    git unzip zip libpq-dev libicu-dev libzip-dev libonig-dev \
+    libxml2-dev libcurl4-openssl-dev pkg-config g++ make autoconf curl
 
-# Extensions PHP
-RUN docker-php-ext-install \
-    pdo \
-    pdo_pgsql \
-    intl \
-    mbstring \
-    xml \
-    zip \
-    curl
-
-# Installer l’extension MongoDB
+RUN docker-php-ext-install pdo pdo_pgsql intl mbstring xml zip curl
 RUN pecl install mongodb && docker-php-ext-enable mongodb
 
-# Installer composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Copier le backend et installer les dépendances PHP
-WORKDIR /app
-COPY ./backend /app
-RUN composer install -vvv --no-dev --optimize-autoloader --no-interaction --no-scripts
+WORKDIR /var/www/html
+COPY ./backend .
+RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-# ====== PROD IMAGE ======
-FROM nginx:1.25-alpine
-
-# Copier le backend depuis le builder
-COPY --from=builder /app /var/www/html
-
-# Copier la config Nginx
+# Nginx inside the same container
+RUN apt-get install -y nginx && rm -rf /var/lib/apt/lists/*
 COPY ./docker/default.conf /etc/nginx/conf.d/default.conf
 
-# Créer les dossiers Symfony et donner les bonnes permissions
-RUN mkdir -p /var/www/html/var/cache /var/www/html/var/log \
-    && chown -R nginx:nginx /var/www/html
+RUN mkdir -p var/cache var/log && chown -R www-data:www-data .
 
-# Exposer le port
 EXPOSE 80
-
-# Lancer Nginx en foreground
-CMD ["nginx", "-g", "daemon off;"]
+CMD service php-fpm start && nginx -g "daemon off;"
