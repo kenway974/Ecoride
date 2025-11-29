@@ -11,7 +11,7 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 COPY ./backend .
-RUN composer install vvv --no-dev --optimize-autoloader --no-interaction
+RUN composer install -vvv --no-dev --optimize-autoloader --no-interaction
 
 # Nginx inside the same container
 RUN apt-get install -y nginx && rm -rf /var/lib/apt/lists/*
