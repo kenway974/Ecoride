@@ -11,6 +11,12 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 COPY ./backend .
+
+RUN echo "APP_ENV=prod" > .env
+
+ENV APP_ENV=prod
+ENV APP_DEBUG=0
+
 RUN composer install -vvv --no-dev --optimize-autoloader --no-interaction
 
 # Nginx inside the same container
